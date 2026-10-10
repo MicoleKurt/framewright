@@ -52,6 +52,8 @@
 
   .opts { display: flex; gap: 28px; margin-top: 18px; font-size: 13px; color: var(--muted); align-items: center; }
   .opts select { background: none; color: var(--text); border: 0; font: inherit; cursor: pointer; }
+  .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .check input { accent-color: var(--accent); }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
   .chip { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
           padding: 6px 14px; cursor: pointer; background: none; transition: color .2s, border-color .2s; }
@@ -125,6 +127,7 @@
               <option value="8">8 scenes (~60s)</option>
             </select>
           </label>
+          <label class="check"><input type="checkbox" id="youtube"> YouTube footage (Creative Commons, slower)</label>
         </div>
         <div class="chips">
           <button type="button" class="chip">The Roman aqueducts</button>
@@ -198,7 +201,7 @@ $("form").addEventListener("submit", async (e) => {
   $("go").disabled = true; $("go").textContent = "Rendering";
   $("frame").classList.remove("ready"); $("script").innerHTML = "";
   const res = await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topic: $("topic").value, scenes: +$("scenes").value }) });
+    body: JSON.stringify({ topic: $("topic").value, scenes: +$("scenes").value, youtube: $("youtube").checked }) });
   const { id, error } = await res.json();
   if (error) { $("caption").innerHTML = `<span class="error">${esc(error)}</span>`; return done(); }
   poll(id);

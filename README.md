@@ -23,6 +23,10 @@ python server.py                                      # web UI → http://localh
 
 ![Coffee video frames](docs/coffee-frames.jpg)
 
+**With `--youtube`: real Creative Commons footage pulled by yt-dlp** (frames 1 and 5 are video clips)
+
+![YouTube footage frames](docs/youtube-frames.jpg)
+
 **Generated video: "the Roman aqueducts"**
 
 ![Aqueducts video frames](docs/aqueducts-frames.jpg)
@@ -38,7 +42,7 @@ python server.py                                      # web UI → http://localh
 | Research | Finds the best Wikipedia article, pulls the intro as grounding facts | Wikipedia API |
 | Script | Local LLM writes the narration as plain prose (one paragraph per scene), then a second call turns each paragraph into image search queries (JSON). Lines with stock AI phrases ("testament", "journey"...) are dropped; too-short output is retried; Wikipedia sentences are the fallback if the LLM is down | Ollama `qwen2.5:7b` |
 | Voice | Neural TTS per scene, with **word-level timestamps** | edge-tts |
-| Footage | Subject-anchored queries → real stock footage (Pexels, if `PEXELS_API_KEY` set) or Wikimedia Commons photos. De-duplicated across scenes | Pexels / Commons |
+| Footage | Subject-anchored queries → real **YouTube footage via yt-dlp** (opt-in `--youtube`, Creative Commons only, licence verified per video, only an 8s segment downloaded, credits saved), Pexels stock video (if `PEXELS_API_KEY` set), and Wikimedia Commons photos. De-duplicated across scenes | yt-dlp / Pexels / Commons |
 | Motion | Ken Burns zoom/pan on stills (alternating direction), crop/loop on video | ffmpeg `zoompan` |
 | Captions | Phrase-grouped captions that break on pauses; spoken word white, the rest grey; serif title card; top/bottom shade so text reads on any photo | ASS subtitles + ffmpeg |
 | Music | Ambient chord pad synthesized in ffmpeg — zero licensing risk | ffmpeg `aevalsrc` |
@@ -52,6 +56,7 @@ gradient card; flaky TTS/429s → retries with backoff.
 
 ```
 videogen/research.py  Wikipedia facts, Commons/Pexels search, downloads
+videogen/youtube.py   yt-dlp: Creative Commons search, licence check, segment download, credits
 videogen/script.py    LLM prompt, validation, fallback
 videogen/voice.py     TTS + word timings
 videogen/render.py    all ffmpeg: clips, captions, music, final mix/grade
@@ -68,6 +73,10 @@ server.py, web/       stdlib HTTP server + single-page UI (job queue, progress, 
 - **Known limitation:** a 7B model occasionally garbles a fact (e.g. merges two sentences from the
   source). A stronger model or a fact-check pass against the source text would fix that.
 - Wikimedia rate-limits parallel downloads (HTTP 429), so media is fetched serially with backoff.
+- **YouTube footage is licence-checked twice:** the search uses YouTube's Creative Commons filter,
+  then each video's own metadata licence is verified before anything is downloaded. CC BY requires
+  credit, so every run with `--youtube` writes `<video>.credits.txt` (title, channel, URL, licence).
+  Music mixes and lyric videos are skipped by title because they're static cards with burned-in text.
 
 ## How to run it
 
@@ -106,7 +115,12 @@ Open http://localhost:8000, type a topic (or click one of the examples), pick a 
 
 ```bash
 python generate.py "the history of coffee" --scenes 6
+
+# add real Creative Commons YouTube footage (slower, ~3-4 min extra per scene)
+python generate.py "the history of coffee" --scenes 4 --youtube
 ```
+
+In the web UI, tick **YouTube footage (Creative Commons, slower)**.
 
 The mp4 (plus a `.json` with the script) is written to `output/`. Intermediate files
 (voice clips, images, captions) are kept in `output/<topic>-<timestamp>/` for debugging.

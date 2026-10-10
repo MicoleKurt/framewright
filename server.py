@@ -13,7 +13,7 @@ JOBS: dict[str, dict] = {}
 RENDER_LOCK = threading.Lock()  # one render at a time: ffmpeg + CPU LLM saturate the machine
 
 
-def run_job(job_id: str, topic: str, scenes: int) -> None:
+def run_job(job_id: str, topic: str, scenes: int, use_youtube: bool) -> None:
     job = JOBS[job_id]
 
     def progress(msg: str, pct: float) -> None:
@@ -22,7 +22,8 @@ def run_job(job_id: str, topic: str, scenes: int) -> None:
     try:
         with RENDER_LOCK:
             job["status"] = "running"
-            path = generate(topic, out_dir=os.path.join(ROOT, "output"), scenes=scenes, progress=progress)
+            path = generate(topic, out_dir=os.path.join(ROOT, "output"), scenes=scenes,
+                            use_youtube=use_youtube, progress=progress)
         job.update(status="done", video="/output/" + os.path.basename(path),
                    script=json.load(open(path[:-4] + ".json")))
     except Exception as e:
@@ -80,7 +81,8 @@ class Handler(BaseHTTPRequestHandler):
         scenes = max(3, min(10, int(body.get("scenes", 6))))
         job_id = uuid.uuid4().hex[:10]
         JOBS[job_id] = {"id": job_id, "topic": topic, "status": "queued", "pct": 0, "msg": "Queued", "log": []}
-        threading.Thread(target=run_job, args=(job_id, topic, scenes), daemon=True).start()
+        threading.Thread(target=run_job, args=(job_id, topic, scenes, bool(body.get("youtube"))),
+                         daemon=True).start()
         self._json({"id": job_id}, 201)
 
     def log_message(self, *_):  # keep the console quiet; pipeline prints its own progress
