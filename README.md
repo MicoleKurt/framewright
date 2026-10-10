@@ -4,6 +4,8 @@ Automated video generator prototype (Manos Corp trial task). Give it a topic, it
 1080×1920 mp4 with a written script, neural voiceover, real photos/footage with motion,
 word-synced captions, a generated music bed, and a film-style grade. No paid APIs, no keys.
 
+**Video (Google Drive):** https://drive.google.com/file/d/1ZpfdJDnzWwFsoNE79vg2NN23Ob0Zx8yr/view?usp=sharing
+
 **Sample output:** [history-of-coffee.mp4](https://github.com/MicoleKurt/video-generator/releases/download/v0.1/history-of-coffee.mp4) (63s, made from the single prompt "the history of coffee")
 
 ```
