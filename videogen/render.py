@@ -63,9 +63,11 @@ def _ts(t: float) -> str:
     return f"{cs//360000}:{cs//6000%60:02d}:{cs//100%60:02d}.{cs%100:02d}"
 
 
-def captions_ass(words: list[dict], out: str, title: str = "", chunk: int = 4) -> None:
+def captions_ass(words: list[dict], out: str, title: str = "", chunk: int = 4,
+                 brand: dict | None = None) -> None:
     """Editorial captions: short phrases, sentence case, spoken word lit, the rest dimmed.
-    Plus a serif title card for the opening seconds."""
+    Plus a serif title card for the opening seconds. With `brand`, the title card becomes the
+    channel's lockup (kicker, amber rule, spaced uppercase serif) and an end card is added."""
     header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {W}
@@ -74,15 +76,32 @@ PlayResY: {H}
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: Cap,Segoe UI Semibold,78,&H00F4F7FA,&H00F4F7FA,&H64000000,&H96000000,0,0,0,0,100,100,0.5,0,1,0,4,2,120,120,420,1
-Style: Title,Georgia,100,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,1,0,0,100,100,0,0,1,0,3,8,120,120,260,1
+Style: Title,Georgia,72,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,1,0,0,100,100,0,0,1,0,3,2,120,120,250,1
+Style: Kicker,Georgia,30,&H00C8CDD2,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,12,0,1,0,2,2,120,120,195,1
+Style: Lockup,Georgia,60,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,0,0,0,100,100,6,0,1,0,3,2,100,100,250,1
+Style: Rule,Arial,20,&H003B8FC8,&H003B8FC8,&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+    # Title/brand text lives in the lower band BELOW the captions (captions sit at y~1420-1500),
+    # never in the upper/middle frame where a subject's face usually is.
     lines = []
-    if title:
-        fade = r"{\fad(500,700)}"
+    fade = r"{\fad(500,700)}"
+    rule = r"{\an7\pos(470,1548)\p1}m 0 0 l 140 0 140 4 0 4{\p0}"  # amber rule, as on the channel banner
+
+    def lockup(start: str, end: str, big: str, small: str) -> None:
+        lines.append(f"Dialogue: 1,{start},{end},Rule,,0,0,0,,{fade}{rule}")
+        lines.append(f"Dialogue: 1,{start},{end},Lockup,,0,0,0,,{fade}{big}")
+        lines.append(f"Dialogue: 1,{start},{end},Kicker,,0,0,0,,{fade}{small}")
+
+    if title and brand:
+        lockup("0:00:00.20", "0:00:04.20", title.upper(), brand["name"].upper())
+    elif title:
         lines.append(f"Dialogue: 1,0:00:00.35,0:00:03.60,Title,,0,0,0,,{fade}{title}")
+    if brand and words:  # end card: channel name + tagline in the same lower band
+        end = words[-1]["end"] + 0.35
+        lockup(_ts(end - 2.6), _ts(end + 0.2), brand["name"].upper(), brand.get("tagline", "").upper())
     groups = _phrases(words, chunk)
     for gi, group in enumerate(groups):
         # a phrase lingers briefly after its last word, but never into the next phrase (libass would stack them)

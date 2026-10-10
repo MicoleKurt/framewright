@@ -57,6 +57,9 @@ gradient card; flaky TTS/429s → retries with backoff.
 ```
 videogen/research.py  Wikipedia facts, Commons/Pexels search, downloads
 videogen/youtube.py   yt-dlp: Creative Commons search, licence check, segment download, credits
+videogen/thumbnail.py Pillow thumbnails (landscape + vertical cover) in the brand style
+videogen/brands.py    channel presets (name, tagline); private ones load from local/ (gitignored)
+scripts/              hand-written scripts for --script
 videogen/script.py    LLM prompt, validation, fallback
 videogen/voice.py     TTS + word timings
 videogen/render.py    all ffmpeg: clips, captions, music, final mix/grade
@@ -125,7 +128,28 @@ In the web UI, tick **YouTube footage (Creative Commons, slower)**.
 The mp4 (plus a `.json` with the script) is written to `output/`. Intermediate files
 (voice clips, images, captions) are kept in `output/<topic>-<timestamp>/` for debugging.
 
-### 4. Optional settings (environment variables)
+### 4. Channel mode: hand-written script + brand + thumbnails
+
+For a real channel you usually want to write (or edit) the script yourself and keep the rest
+automated. Put the script in a JSON file (see [scripts/example.json](scripts/example.json))
+and pick a brand preset:
+
+```bash
+python generate.py "the history of coffee" --script scripts/example.json --brand example
+```
+
+This skips research and the LLM, then does voice, footage, animation, captions and music as usual, plus:
+
+- **Brand lockup:** channel name, amber rule and title in the lower band, below the captions, so text never covers a face; matching end card
+- **Thumbnails:** `<video>.thumb.jpg` (1280x720, hook on a dark panel, subject kept clear) and `<video>.cover.jpg` (1080x1920)
+- **Upload metadata:** `<video>.youtube.json` with title, description and tags (and CC credits if YouTube footage was used)
+
+Script fields: `scenes[].narration`, `scenes[].keywords` (image searches), optional `scenes[].anchor: false`
+to use keywords exactly, `thumbnail.label` (name) / `thumbnail.hook` / `thumbnail.scene`, and `youtube.{title,description,tags}`.
+Brand presets live in [videogen/brands.py](videogen/brands.py); keep real channel presets private in
+`local/brands.local.json` (gitignored), which is merged in automatically.
+
+### 5. Optional settings (environment variables)
 
 | Variable | Default | Purpose |
 |---|---|---|

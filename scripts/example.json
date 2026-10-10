@@ -1,0 +1,28 @@
+{
+  "title": "The History of Coffee",
+  "subject": "coffee",
+  "scenes": [
+    {
+      "narration": "Wild coffee plants grew in the forests of Ethiopia long before anyone brewed a cup. By the fifteenth century, Sufi monks in Yemen were drinking it to stay awake through night prayers.",
+      "keywords": ["Ethiopia coffee forest", "Yemen coffee"]
+    },
+    {
+      "narration": "From Yemen it spread to Mecca, Cairo, Damascus and Istanbul. Coffee houses became the places where people met, argued and shared news.",
+      "keywords": ["Ottoman coffee house", "Istanbul coffee"]
+    },
+    {
+      "narration": "In 1720, Gabriel de Clieu carried coffee seedlings to Martinique. Within decades the Caribbean was supplying much of the world's coffee.",
+      "keywords": ["Martinique coffee plantation", "coffee seedling"]
+    },
+    {
+      "narration": "By 1852 Brazil was the largest producer on Earth, and it still is. Every cup today traces back to those Ethiopian forests.",
+      "keywords": ["Brazil coffee plantation", "coffee cherries"]
+    }
+  ],
+  "thumbnail": { "label": "The History of Coffee", "hook": "It started\nin a forest", "scene": 0 },
+  "youtube": {
+    "title": "How Coffee Conquered the World",
+    "description": "From Ethiopian forests to Brazil's plantations: the short history of coffee.",
+    "tags": ["coffee", "history", "shorts"]
+  }
+}

@@ -5,7 +5,7 @@ import re
 import time
 from typing import Callable
 
-from . import render, research, script, voice, youtube
+from . import render, research, script, thumbnail, voice, youtube
 
 Progress = Callable[[str, float], None]
 
@@ -20,7 +20,10 @@ def _gather_media(scene: dict, idx: int, work: str, used: set, subject: str,
     keyed, else Commons photos. Queries are anchored to the subject so 'Ethiopia' doesn't
     return random landscapes."""
     files = []
-    queries = [k if subject.lower() in k.lower() else f"{subject} {k}" for k in scene["keywords"]]
+    # hand-written scripts can mark keywords as exact ("anchor": false), e.g. "Battle of Chaeronea"
+    anchor = scene.get("anchor", True)
+    queries = [k if not anchor or subject.lower() in k.lower() else f"{subject} {k}"
+               for k in scene["keywords"]]
     if use_youtube:
         try:
             clip = youtube.cc_clip(queries[0], f"{work}/s{idx}_yt", used=used)
@@ -48,18 +51,29 @@ def _gather_media(scene: dict, idx: int, work: str, used: set, subject: str,
     return files
 
 
+def _write_json(path: str, data: dict) -> None:
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+
 def generate(topic: str, out_dir: str = "output", scenes: int = 6, use_youtube: bool = False,
+             script_file: str | None = None, brand: dict | None = None,
              progress: Progress = lambda msg, pct: print(f"[{pct:5.1f}%] {msg}")) -> str:
     t0 = time.time()
     work = os.path.abspath(f"{out_dir}/{slug(topic)}-{int(t0)}")
     os.makedirs(work, exist_ok=True)
 
-    progress("Researching topic on Wikipedia", 5)
-    facts = research.wiki_facts(topic)
-
-    progress(f"Writing script with {script.MODEL}", 12)
-    plan = script.write_script(topic, facts, scenes)
-    json.dump(plan, open(f"{work}/script.json", "w"), indent=2)
+    if script_file:  # human-written script: skip research + LLM, keep everything else automated
+        with open(script_file, encoding="utf-8") as f:
+            plan = json.load(f)
+        facts = {"title": plan["title"], "text": ""}
+        progress("Using provided script", 12)
+    else:
+        progress("Researching topic on Wikipedia", 5)
+        facts = research.wiki_facts(topic)
+        progress(f"Writing script with {script.MODEL}", 12)
+        plan = script.write_script(topic, facts, scenes)
+    _write_json(f"{work}/script.json", plan)
 
     progress("Recording voiceover", 30)
     voice_files, words, offset = [], [], 0.0
@@ -74,11 +88,11 @@ def generate(topic: str, out_dir: str = "output", scenes: int = 6, use_youtube: 
         voice_files.append(padded)
         durations.append(d)
         offset += d
-    render.captions_ass(words, f"{work}/captions.ass", plan["title"])
+    render.captions_ass(words, f"{work}/captions.ass", plan["title"], brand=brand)
 
     progress("Finding footage & images", 45)
     used: set = set()
-    subject = script.subject(topic, facts["title"])
+    subject = plan.get("subject") or script.subject(topic, facts["title"])
     # serial on purpose: upload.wikimedia.org rate-limits parallel clients (HTTP 429)
     credits: list[dict] = []
     media = [_gather_media(sc, i, work, used, subject, use_youtube, credits)
@@ -109,10 +123,33 @@ def generate(topic: str, out_dir: str = "output", scenes: int = 6, use_youtube: 
     progress("Mixing music, captions & final encode", 88)
     final = os.path.abspath(f"{out_dir}/{slug(plan['title'])}-{int(t0)}.mp4")
     render.assemble(work, clips, voice_files, final)
-    json.dump(plan, open(final[:-4] + ".json", "w"), indent=2)  # script travels with the video
+    _write_json(final[:-4] + ".json", plan)  # script travels with the video
+    _publish_assets(plan, media, final, brand, credits)
     if credits:  # CC BY requires attribution
         with open(final[:-4] + ".credits.txt", "w", encoding="utf-8") as f:
             f.writelines(f'"{c["title"]}" by {c["channel"]}, {c["url"]} ({c["license"]})\n'
                          for c in credits)
     progress(f"Done in {time.time() - t0:.0f}s", 100)
     return final
+
+
+def _publish_assets(plan: dict, media: list[list[str]], final: str, brand: dict | None,
+                    credits: list[dict]) -> None:
+    """Thumbnails + upload metadata next to the mp4, so publishing needs no extra editing."""
+    thumb = plan.get("thumbnail")
+    if thumb:
+        idx = thumb.get("scene", 0)
+        stills = [f for f in media[idx] if not f.endswith(".mp4")] or \
+                 [f for files in media for f in files if not f.endswith(".mp4")]
+        if stills:
+            kicker = brand["name"] if brand else ""
+            label = thumb.get("label", "")
+            thumbnail.make(stills[0], thumb["hook"], final[:-4] + ".thumb.jpg", kicker, label)
+            thumbnail.make_vertical(stills[0], thumb["hook"], final[:-4] + ".cover.jpg", kicker, label)
+    meta = plan.get("youtube")
+    if meta:
+        desc = meta.get("description", "")
+        if credits:
+            desc += "\n\nFootage (CC BY):\n" + "\n".join(
+                f"{c['title']} by {c['channel']} {c['url']}" for c in credits)
+        _write_json(final[:-4] + ".youtube.json", {**meta, "description": desc})
