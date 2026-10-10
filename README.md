@@ -11,6 +11,24 @@ python generate.py "the history of coffee"          # CLI
 python server.py                                      # web UI → http://localhost:8000
 ```
 
+## Screenshots
+
+**Web UI**: type a topic, watch each stage complete, preview and download the mp4.
+
+![Web UI](docs/ui.png)
+
+**Generated video: "the history of coffee"** (one frame every ~10s)
+
+![Coffee video frames](docs/coffee-frames.jpg)
+
+**Generated video: "the Roman aqueducts"**
+
+![Aqueducts video frames](docs/aqueducts-frames.jpg)
+
+| Title card | Word-synced captions | Captions on archive imagery |
+|---|---|---|
+| ![](docs/coffee-title.jpg) | ![](docs/coffee-caption.jpg) | ![](docs/aqueducts-caption.jpg) |
+
 ## Pipeline
 
 | Stage | What happens | Tool |
@@ -49,15 +67,71 @@ server.py, web/       stdlib HTTP server + single-page UI (job queue, progress, 
   source). A stronger model or a fact-check pass against the source text would fix that.
 - Wikimedia rate-limits parallel downloads (HTTP 429), so media is fetched serially with backoff.
 
-## Tests
+## How to run it
 
-`python tests/test_captions.py` checks caption timing invariants (one event per word, no
-overlapping lines, phrases break on pauses).
+### 1. Install the tools (one time)
 
-## Setup
+| Tool | Windows | macOS |
+|---|---|---|
+| Python 3.11+ | `winget install Python.Python.3.11` | `brew install python` |
+| ffmpeg | `winget install Gyan.FFmpeg` | `brew install ffmpeg` |
+| Ollama | `winget install Ollama.Ollama` | `brew install ollama` |
 
-Python 3.11+, ffmpeg on PATH, `pip install -r requirements.txt`, Ollama with `qwen2.5:7b`.
-Env: `OLLAMA_MODEL`, `OLLAMA_NUM_GPU` (default `0` = CPU, `-1` = let Ollama use GPU), `PEXELS_API_KEY`.
+Restart the terminal afterwards so `python`, `ffmpeg` and `ollama` are on your PATH.
+
+### 2. Get the code and dependencies
+
+```bash
+git clone https://github.com/MicoleKurt/video-generator.git
+cd video-generator
+pip install -r requirements.txt
+ollama pull qwen2.5:7b
+```
+
+### 3. Generate a video
+
+**Web UI** (recommended):
+
+```bash
+python server.py
+```
+
+Open http://localhost:8000, type a topic (or click one of the examples), pick a length and press
+**Generate**. Progress shows step by step; when it finishes the video plays in the page with a
+**Download mp4** link and the generated script underneath.
+
+**Command line:**
+
+```bash
+python generate.py "the history of coffee" --scenes 6
+```
+
+The mp4 (plus a `.json` with the script) is written to `output/`. Intermediate files
+(voice clips, images, captions) are kept in `output/<topic>-<timestamp>/` for debugging.
+
+### 4. Optional settings (environment variables)
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `OLLAMA_MODEL` | `qwen2.5:7b` | Any Ollama model, e.g. `llama3.1:8b` |
+| `OLLAMA_NUM_GPU` | `0` (CPU) | Set `-1` to let Ollama use your GPU (much faster if it works) |
+| `PEXELS_API_KEY` | none | Free key from pexels.com/api: adds real stock **video** footage |
+| `PORT` | `8000` | Web UI port |
+
+### Troubleshooting
+
+- **Script falls back to Wikipedia sentences:** Ollama isn't running or the model isn't pulled.
+  Run `ollama list`; start it with `ollama serve`.
+- **`CUDA error` from Ollama:** keep `OLLAMA_NUM_GPU=0` (the default).
+- **`429 Too Many Requests` lines in the log:** Wikimedia throttling; the pipeline retries and
+  skips to the next image automatically.
+- **A run takes 5-10 minutes:** expected on CPU; most of it is the LLM and the zoom animation.
+
+### Tests
+
+```bash
+python tests/test_captions.py
+```
 
 ## What I'd add next
 
