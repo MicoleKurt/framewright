@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0d0b;
+    --panel: #151411;
+    --line: #2a2723;
+    --text: #ece7df;
+    --muted: #8d867b;
+    --faint: #5a554d;
+    --accent: #d9a35b;
+    --serif: "Instrument Serif", Georgia, serif;
+    --sans: "Inter", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, monospace;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); min-height: 100vh;
+         -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 40px 64px; }
+
+  header { display: flex; justify-content: space-between; align-items: baseline;
+           padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .brand { font: 14px/1 var(--mono); color: var(--muted); }
+  .brand i { color: var(--accent); }
+  .meta { font: 12px var(--mono); color: var(--faint); letter-spacing: .04em; }
+
+  main { display: grid; grid-template-columns: 1fr 380px; gap: 72px; padding-top: 64px; }
+
+  .eyebrow { font: 11px var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  h1 { font: 400 clamp(44px, 5vw, 64px)/1.05 var(--serif); letter-spacing: -.01em; margin: 0 0 18px; }
+  h1 em { color: var(--accent); }
+  .lede { color: var(--muted); max-width: 46ch; font-size: 16px; }
+
+  form { margin-top: 44px; }
+  .field { display: flex; align-items: center; border-bottom: 1px solid var(--line);
+           transition: border-color .2s; }
+  .field:focus-within { border-color: var(--text); }
+  .field input { flex: 1; background: none; border: 0; outline: 0; color: var(--text);
+                 font: 30px/1.3 var(--serif); padding: 14px 0; min-width: 0; }
+  .field input::placeholder { color: var(--faint); font-style: italic; }
+  button { background: var(--text); color: var(--bg); border: 0; border-radius: 999px;
+           font: 500 14px var(--sans); padding: 12px 22px; cursor: pointer; white-space: nowrap;
+           transition: background .2s, opacity .2s; }
+  button:hover { background: var(--accent); }
+  button:disabled { opacity: .35; cursor: default; background: var(--text); }
+
+  .opts { display: flex; gap: 28px; margin-top: 18px; font-size: 13px; color: var(--muted); align-items: center; }
+  .opts select { background: none; color: var(--text); border: 0; font: inherit; cursor: pointer; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+  .chip { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
+          padding: 6px 14px; cursor: pointer; background: none; transition: color .2s, border-color .2s; }
+  .chip:hover { color: var(--text); border-color: var(--faint); background: none; }
+
+  .steps { list-style: none; padding: 0; margin-top: 56px; border-top: 1px solid var(--line); }
+  .steps li { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; padding: 14px 0;
+              border-bottom: 1px solid var(--line); color: var(--faint); font-size: 14px; transition: color .3s; }
+  .steps .n { font: 12px var(--mono); padding-top: 2px; }
+  .steps .s { font: 12px var(--mono); }
+  .steps li.active { color: var(--text); }
+  .steps li.active .s { color: var(--accent); }
+  .steps li.done { color: var(--muted); }
+
+  aside { position: sticky; top: 32px; align-self: start; }
+  .frame { aspect-ratio: 9 / 16; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+           overflow: hidden; position: relative; display: grid; place-items: center; }
+  .frame video { width: 100%; height: 100%; object-fit: cover; display: none; }
+  .frame.ready video { display: block; }
+  .placeholder { text-align: center; padding: 32px; }
+  .placeholder p { font: italic 22px/1.3 var(--serif); color: var(--faint); }
+  .frame.ready .placeholder { display: none; }
+  .bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--accent);
+         transition: width .6s ease; }
+  .caption { margin-top: 16px; display: flex; justify-content: space-between; align-items: center;
+             font-size: 13px; color: var(--muted); min-height: 24px; }
+  .caption a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--faint); }
+  .caption a:hover { border-color: var(--accent); }
+  .error { color: #d98b7a; }
+
+  .script { margin-top: 28px; }
+  .script ol { padding: 0; list-style: none; counter-reset: s; }
+  .script li { counter-increment: s; padding: 12px 0; border-top: 1px solid var(--line);
+               font: 17px/1.45 var(--serif); color: var(--text); }
+  .script li::before { content: counter(s, decimal-leading-zero); font: 11px var(--mono);
+                       color: var(--faint); display: block; margin-bottom: 4px; }
+
+  @media (max-width: 880px) {
+    .wrap { padding: 20px 16px 48px; }
+    main { grid-template-columns: 1fr; gap: 48px; padding-top: 40px; }
+    aside { position: static; max-width: 380px; width: 100%; margin: 0 auto; }
+    .field input { font-size: 24px; }
+    .meta { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">videogen</div>
+    <div class="meta">v0.1 prototype</div>
+  </header>
+
+  <main>
+    <section>
+      <h1>Video generator</h1>
+      <p class="lede">Enter a topic. It pulls facts from Wikipedia, writes a script with a local
+        model, records a voiceover, finds photos on Wikimedia Commons and renders a 1080×1920 mp4
+        with captions and background music. A run takes a few minutes on a laptop CPU.</p>
+
+      <form id="form">
+        <div class="field">
+          <input id="topic" placeholder="e.g. the history of coffee" autocomplete="off" required>
+          <button id="go" type="submit">Generate</button>
+        </div>
+        <div class="opts">
+          <label>Length:
+            <select id="scenes">
+              <option value="4">4 scenes (~30s)</option>
+              <option value="6" selected>6 scenes (~45s)</option>
+              <option value="8">8 scenes (~60s)</option>
+            </select>
+          </label>
+        </div>
+        <div class="chips">
+          <button type="button" class="chip">The Roman aqueducts</button>
+          <button type="button" class="chip">How lighthouses work</button>
+          <button type="button" class="chip">The Apollo 11 landing</button>
+          <button type="button" class="chip">Japanese tea ceremony</button>
+        </div>
+      </form>
+
+      <ol class="steps" id="steps"></ol>
+    </section>
+
+    <aside>
+      <div class="frame" id="frame">
+        <div class="placeholder"><p>No video yet</p></div>
+        <video id="video" controls playsinline></video>
+        <div class="bar" id="bar"></div>
+      </div>
+      <div class="caption" id="caption"><span>Nothing rendered yet</span></div>
+      <div class="script" id="script"></div>
+    </aside>
+  </main>
+</div>
+
+<script>
+const STEPS = [
+  ["Research", "Researching"], ["Script", "Writing script"], ["Voice", "Recording voiceover"],
+  ["Images", "Finding footage"], ["Animate", "Animating"], ["Encode", "Mixing"],
+];
+const $ = (id) => document.getElementById(id);
+const stepsEl = $("steps");
+stepsEl.innerHTML = STEPS.map(([name], i) =>
+  `<li><span class="n">0${i + 1}</span><span>${name}</span><span class="s"></span></li>`).join("");
+
+function paintSteps(msg, status) {
+  const idx = STEPS.findIndex(([, key]) => msg.startsWith(key));
+  [...stepsEl.children].forEach((li, i) => {
+    const done = status === "done" || i < idx, active = status === "running" && i === idx;
+    li.className = done ? "done" : active ? "active" : "";
+    li.querySelector(".s").textContent = done ? "done" : active ? (msg.match(/\d+\/\d+/) || ["working"])[0] : "";
+  });
+}
+
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+async function poll(id) {
+  const job = await (await fetch(`/api/jobs/${id}`)).json();
+  $("bar").style.width = `${job.pct || 0}%`;
+  paintSteps(job.msg || "", job.status);
+  if (job.status === "error") {
+    $("caption").innerHTML = `<span class="error">${esc(job.msg)}</span>`;
+    return done();
+  }
+  if (job.status !== "done") {
+    $("caption").innerHTML = `<span>${esc(job.msg)}</span><span>${Math.round(job.pct)}%</span>`;
+    return setTimeout(() => poll(id), 1200);
+  }
+  $("video").src = job.video;
+  $("frame").classList.add("ready");
+  $("bar").style.width = "0";
+  $("caption").innerHTML = `<span>${esc(job.script.title)}</span><a href="${job.video}" download>Download mp4</a>`;
+  $("script").innerHTML = `<div class="eyebrow">Script</div><ol>${
+    job.script.scenes.map((s) => `<li>${esc(s.narration)}</li>`).join("")}</ol>`;
+  done();
+}
+
+function done() { $("go").disabled = false; $("go").textContent = "Generate"; }
+
+$("form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  $("go").disabled = true; $("go").textContent = "Rendering";
+  $("frame").classList.remove("ready"); $("script").innerHTML = "";
+  const res = await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic: $("topic").value, scenes: +$("scenes").value }) });
+  const { id, error } = await res.json();
+  if (error) { $("caption").innerHTML = `<span class="error">${esc(error)}</span>`; return done(); }
+  poll(id);
+});
+
+document.querySelectorAll(".chip").forEach((c) =>
+  c.addEventListener("click", () => { $("topic").value = c.textContent; $("topic").focus(); }));
+</script>
+</body>
+</html>
