@@ -15,6 +15,7 @@ python server.py                                      # web UI → http://localh
 
 ## Screenshots
 
+
 **Web UI**: type a topic, watch each stage complete, preview and download the mp4.
 
 ![Web UI](docs/ui.png)
