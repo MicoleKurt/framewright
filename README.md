@@ -15,6 +15,8 @@ Free and local: no API bills, no watermark, your machine.</p>
 
 ---
 
+<p align="center"><img src="docs/img/ui.png" alt="Framewright UI" width="860"></p>
+
 ## What it makes
 
 | | **Short** | **Long-form** |
