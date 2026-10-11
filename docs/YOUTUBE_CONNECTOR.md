@@ -45,7 +45,7 @@ iframesco youtube videos 10
 iframesco youtube update VIDEO_ID '{"title": "New title"}'
 iframesco youtube schedule VIDEO_ID 2026-10-12T19:00:00-04:00
 iframesco youtube thumbnail VIDEO_ID output/my-video.thumb.jpg
-iframesco youtube playlist VIDEO_ID "Origin Stories"
+iframesco youtube playlist VIDEO_ID "My Playlist"
 iframesco youtube analytics
 iframesco youtube upload output/my-video-long-123.mp4 2026-10-13T11:00:00-04:00
 ```

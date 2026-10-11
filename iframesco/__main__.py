@@ -1,7 +1,7 @@
 """iframesco CLI.
 
   iframesco make "The Apollo 13 rescue" --format long --minutes 10
-  iframesco make "Alexander" --script examples/alexander.json
+  iframesco make "Ada Lovelace" --script examples/ada.json
   iframesco serve                       # web UI + queue
   iframesco worker                      # extra render process for the same queue
   iframesco voices --sample "Some text" # render one sample per voice preset

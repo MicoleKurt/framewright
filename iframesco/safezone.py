@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 from . import formats, render
 
-SAMPLE = "Before he conquered the known world Alexander was a boy watching grown men fail".split()
+SAMPLE = "Before she wrote the first program Ada was a girl who dreamed of flying machines".split()
 
 
 def preview(image: str, out: str, title: str = "Sample title", brand: str = "Your channel") -> str:
