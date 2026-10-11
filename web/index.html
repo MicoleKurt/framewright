@@ -307,9 +307,13 @@ $("form").addEventListener("submit", async (e) => {
   select(id);
 });
 
-setFmt("short");
+// deep links: #format=long&topic=...&job=ID&tab=publish
+const H = new URLSearchParams(location.hash.slice(1));
+setFmt(H.get("format") === "long" ? "long" : "short");
+if (H.get("topic")) $("topic").value = H.get("topic");
 loadPresets();
 refreshQueue();
+if (H.get("job")) select(H.get("job")).then(() => H.get("tab") && document.querySelector(`#tabs [data-p="${H.get("tab")}"]`)?.click());
 setInterval(refreshQueue, 4000);
 </script>
 </body>

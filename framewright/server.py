@@ -113,6 +113,9 @@ def make_handler(queue: Queue):
                       "voice": body.get("voice") if body.get("voice") in voice.PRESETS else None,
                       "brand": body.get("brand") if body.get("brand") in brands.BRANDS else None,
                       "youtube": bool(body.get("youtube"))}
+            example = os.path.join(ROOT, "examples", os.path.basename(str(body.get("example") or "")))
+            if body.get("example") and os.path.isfile(example):  # bundled example scripts only
+                params["script"] = example
             self._json({"id": queue.submit(params)}, 201)
 
         def do_DELETE(self):
