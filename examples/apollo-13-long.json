@@ -1,0 +1,55 @@
+{
+  "title": "Apollo 13",
+  "subject": "Apollo 13",
+  "format": "long",
+  "mood": "tense",
+  "pronounce": {"Haise": "Haze"},
+  "scenes": [
+    {
+      "narration": "Two hundred thousand miles from home, a bang shook the spacecraft. Warning lights came on. Oxygen was venting into space, and the three men aboard were losing the power, water and air they needed to survive.",
+      "keywords": ["Apollo 13 service module damage", "Apollo 13 mission control"],
+      "anchor": false
+    },
+    {
+      "narration": "This is the story of how they came home anyway, and of the cardboard, plastic and tape that helped keep them alive.",
+      "keywords": ["Apollo 13 lithium hydroxide adapter", "Apollo 13 crew"],
+      "anchor": false,
+      "pause": 0.9
+    },
+    {
+      "chapter": "The launch",
+      "narration": "Apollo 13 launched on April 11, 1970, with Jim Lovell in command, Jack Swigert flying the command module and Fred Haise flying the lunar module. It was meant to be the third crewed landing on the Moon.",
+      "keywords": ["Apollo 13 launch Saturn V", "Apollo 13 crew portrait"],
+      "anchor": false
+    },
+    {
+      "chapter": "Houston, we've had a problem",
+      "narration": "On April 13, an oxygen tank in the service module exploded. Swigert radioed the words that became famous: Houston, we've had a problem. The landing was over. Survival was the only mission left.",
+      "keywords": ["Apollo 13 mission control 1970", "Apollo 13 service module"],
+      "anchor": false
+    },
+    {
+      "chapter": "The lifeboat",
+      "narration": "The crew moved into the lunar module, Aquarius, and used it as a lifeboat. It was built to support two men for two days. Now it had to keep three men alive for four.",
+      "keywords": ["Apollo 13 lunar module Aquarius", "Apollo lunar module interior"],
+      "anchor": false
+    },
+    {
+      "narration": "Carbon dioxide began to build up. The command module's square filter canisters did not fit the lunar module's round openings, so engineers on the ground designed an adapter from plastic bags, cardboard and tape, and talked the crew through building it.",
+      "keywords": ["Apollo 13 lithium hydroxide canister adapter", "Apollo 13 mailbox"],
+      "anchor": false
+    },
+    {
+      "chapter": "Splashdown",
+      "narration": "They swung around the Moon and headed home. On April 17, 1970, the command module splashed down in the South Pacific, and the crew was recovered by the USS Iwo Jima. All three men were alive.",
+      "keywords": ["Apollo 13 splashdown", "Apollo 13 recovery USS Iwo Jima"],
+      "anchor": false
+    }
+  ],
+  "thumbnail": {"label": "Apollo 13", "hook": "Houston, we've\nhad a problem", "scene": 0},
+  "youtube": {
+    "title": "The Cardboard Fix That Saved Apollo 13",
+    "description": "An explosion two days into the flight ended the Moon landing and started a four-day fight to get three astronauts home.\n\nSource: NASA, Apollo 13 Mission Report (MSC-02680), 1970.",
+    "tags": ["Apollo 13", "NASA", "space history", "Jim Lovell", "Houston we have a problem", "documentary"]
+  }
+}

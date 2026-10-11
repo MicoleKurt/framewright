@@ -1,4 +1,14 @@
+# core (Shorts + long-form, edge voices, Wikimedia media)
 edge-tts>=7.2
 requests>=2.31
-yt-dlp>=2025.1
 Pillow>=10
+yt-dlp>=2025.1
+# offline soothing voices (Kokoro-82M) - optional but recommended
+kokoro>=0.9.4
+soundfile>=0.12
+# footage relevance scoring with CLIP - optional
+open_clip_torch>=2.24
+# YouTube connector + MCP server - optional
+google-api-python-client>=2.100
+google-auth-oauthlib>=1.2
+mcp>=1.10

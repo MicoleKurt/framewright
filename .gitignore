@@ -1,6 +1,11 @@
 output/
-__pycache__/
-*.pyc
+samples/
+local/
 .env
 .claude/
-local/
+__pycache__/
+*.pyc
+*.egg-info/
+music/*
+!music/library.json
+!music/README.md

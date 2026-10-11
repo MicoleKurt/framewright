@@ -28,7 +28,8 @@ def search_cc(query: str, limit: int = 6) -> list[dict]:
     return usable[:limit]
 
 
-def cc_clip(query: str, path_stem: str, seconds: float = 8.0, used: set | None = None) -> dict | None:
+def cc_clip(query: str, path_stem: str, seconds: float = 8.0, used: set | None = None,
+            orientation: str = "portrait") -> dict | None:
     """Download a `seconds`-long 1080p segment from the first verified-CC result.
     Returns {"path", "title", "channel", "url", "license"} or None."""
     used = used if used is not None else set()

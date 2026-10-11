@@ -1,186 +1,144 @@
-# videogen: topic in, vertical mp4 out
+<p align="center">
+  <img src="assets/logo.svg" alt="Framewright" width="360">
+</p>
 
-Automated video generator prototype (Manos Corp trial task). Give it a topic, it returns a
-1080×1920 mp4 with a written script, neural voiceover, real photos/footage with motion,
-word-synced captions, a generated music bed, and a film-style grade. No paid APIs, no keys.
+<p align="center"><b>Topic in. Publish-ready YouTube video out.</b><br>
+Shorts and long-form documentaries, written from real sources, narrated, cut, captioned, chaptered and packaged.<br>
+Free and local: no API bills, no watermark, your machine.</p>
 
-**Video (Google Drive):** https://drive.google.com/file/d/1ZpfdJDnzWwFsoNE79vg2NN23Ob0Zx8yr/view?usp=sharing
+<p align="center">
+  <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-1f1a24?style=flat-square">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-1f1a24?style=flat-square">
+  <img alt="Cost" src="https://img.shields.io/badge/cost-%240%20per%20video-ff6b4a?style=flat-square">
+  <img alt="Formats" src="https://img.shields.io/badge/formats-Shorts%20%C2%B7%20long--form-ffc15e?style=flat-square">
+</p>
 
-**Sample output:** [history-of-coffee.mp4](https://github.com/MicoleKurt/video-generator/releases/download/v0.1/history-of-coffee.mp4) (63s, made from the single prompt "the history of coffee")
+---
 
-```
-python generate.py "the history of coffee"          # CLI
-python server.py                                      # web UI → http://localhost:8000
-```
+## What it makes
 
-## Screenshots
-
-
-**Web UI**: type a topic, watch each stage complete, preview and download the mp4.
-
-![Web UI](docs/ui.png)
-
-**Generated video: "the history of coffee"** (one frame every ~10s)
-
-![Coffee video frames](docs/coffee-frames.jpg)
-
-**With `--youtube`: real Creative Commons footage pulled by yt-dlp** (frames 1 and 5 are video clips)
-
-![YouTube footage frames](docs/youtube-frames.jpg)
-
-**Generated video: "the Roman aqueducts"**
-
-![Aqueducts video frames](docs/aqueducts-frames.jpg)
-
-| Title card | Word-synced captions | Captions on archive imagery |
+| | **Short** | **Long-form** |
 |---|---|---|
-| ![](docs/coffee-title.jpg) | ![](docs/coffee-caption.jpg) | ![](docs/aqueducts-caption.jpg) |
+| Canvas | 1080×1920 | 1920×1080 |
+| Length | 30-60 s | 6-15 min, 5-8 chapters |
+| Captions | burned-in karaoke | `.srt` for YouTube CC |
+| Packaging | 9:16 cover, title, description, tags | 1280×720 thumbnail, chapter timestamps, title options |
 
-## Pipeline
+Every render ships with `video.mp4`, thumbnail(s), `.youtube.json` (title / description / tags / chapters),
+`.srt`, the script, and a credits file for Creative Commons media.
 
-| Stage | What happens | Tool |
+## Built for retention, not just "a video"
+
+The writer follows the structure that keeps viewers past the first 30 seconds
+([research notes](docs/RESEARCH.md)):
+
+1. **Cold open** on the most dramatic true moment. No greeting, no logo sting.
+2. **Promise**: one specific line about what the viewer will understand.
+3. **Stakes**: why it mattered.
+4. **Chapters that end on open loops**: a question that pulls into the next chapter.
+5. **Payoff** that answers the cold open.
+
+Plus the packaging that earns the click: thumbnail hook and title written as one unit (never
+repeating each other), three title options, and chapters YouTube recognises.
+
+## Features
+
+- **Local writer**: Ollama (`qwen3:8b` by default, auto-falls back to any installed model), outline → cold open → chapters.
+- **Grounded**: research from the full Wikipedia article; a fact-check pass drops sentences whose numbers or years aren't in the source.
+- **Soothing narration, offline**: Kokoro-82M voices, or Microsoft Edge neural voices with no install. Presets: `soothing`, `storyteller`, `documentary`, `warm`, `british`, `energetic`.
+- **Pronunciation control**: respell hard names for the voice; captions keep the real spelling.
+- **Relevance-ranked footage**: Pexels + Pixabay stock video (free keys) and Wikimedia Commons stills, re-ranked with **CLIP** against each narration line; near-duplicate shots rejected.
+- **Cinematic render**: Ken Burns motion, crossfades, film grade, chapter lower-thirds, music ducked under the voice, -14 LUFS loudness, NVENC when your GPU supports it.
+- **Mood music**: a local licensed library tagged by mood; generated ambient pad as fallback.
+- **Brand templates**: accent colour, fonts, kicker/tagline, default voice and format per channel.
+- **Job queue that survives restarts** (SQLite), extra worker processes, optional S3 mirror.
+- **YouTube connector**: an MCP server + CLI for your channel: edit, schedule, thumbnails, playlists, captions, retention analytics, uploads, and "make me a video" from Claude.
+
+## Quick start
+
+```bash
+git clone https://github.com/MicoleKurt/framewright && cd framewright
+pip install -e ".[all]"          # or: pip install -r requirements.txt
+ollama pull qwen3:8b             # https://ollama.com (any model works; see FALLBACKS)
+framewright serve                # http://localhost:8000
+```
+
+Needs Python 3.10+ and [ffmpeg](https://ffmpeg.org) on PATH.
+
+```bash
+framewright make "How the Apollo 13 crew made it home" --format long --minutes 10
+framewright make "The history of coffee" --format short --voice storyteller
+framewright make "Apollo 13" --script examples/apollo-13-long.json --brand noir
+framewright voices                       # one sample per voice preset into samples/
+```
+
+Optional free keys for real stock video: `PEXELS_API_KEY`, `PIXABAY_API_KEY`.
+
+## Publish from Claude (MCP)
+
+```bash
+framewright youtube auth                                  # one-time Google consent
+claude mcp add youtube -- python -m framewright.mcp_server
+```
+
+Then ask: *"Make a 10-minute video on the Apollo 13 rescue, upload it, add it to my History playlist
+and schedule it for Sunday 11 AM Eastern."* Setup and limits: [docs/YOUTUBE_CONNECTOR.md](docs/YOUTUBE_CONNECTOR.md).
+
+## How it works
+
+```mermaid
+flowchart LR
+  T[Topic or script] --> R[Wikipedia research]
+  R --> O[Outline: cold open, chapters, open loops]
+  O --> W[Chapter prose] --> F[Fact check]
+  F --> V[Voice: Kokoro / Edge + word timings]
+  F --> Q[Image queries]
+  Q --> M[Pexels · Pixabay · Commons] --> C[CLIP re-rank + dedupe]
+  V --> X[Render: Ken Burns, crossfades, grade, chapter cards]
+  C --> X --> P[Package: mp4, thumbnail, srt, chapters, metadata]
+  P --> Y[YouTube connector / MCP]
+```
+
+## Configuration
+
+| Variable | Default | |
 |---|---|---|
-| Research | Finds the best Wikipedia article, pulls the intro as grounding facts | Wikipedia API |
-| Script | Local LLM writes the narration as plain prose (one paragraph per scene), then a second call turns each paragraph into image search queries (JSON). Lines with stock AI phrases ("testament", "journey"...) are dropped; too-short output is retried; Wikipedia sentences are the fallback if the LLM is down | Ollama `qwen2.5:7b` |
-| Voice | Neural TTS per scene, with **word-level timestamps** | edge-tts |
-| Footage | Subject-anchored queries → real **YouTube footage via yt-dlp** (opt-in `--youtube`, Creative Commons only, licence verified per video, only an 8s segment downloaded, credits saved), Pexels stock video (if `PEXELS_API_KEY` set), and Wikimedia Commons photos. De-duplicated across scenes | yt-dlp / Pexels / Commons |
-| Motion | Ken Burns zoom/pan on stills (alternating direction), crop/loop on video | ffmpeg `zoompan` |
-| Captions | Phrase-grouped captions that break on pauses; spoken word white, the rest grey; serif title card; top/bottom shade so text reads on any photo | ASS subtitles + ffmpeg |
-| Music | Ambient chord pad synthesized in ffmpeg — zero licensing risk | ffmpeg `aevalsrc` |
-| Mix | Music side-chain ducked under the voice, loudness-normalised to −14 LUFS (platform standard) | ffmpeg |
-| Grade | Contrast, muted warm palette, vignette, grain, fades | ffmpeg |
+| `OLLAMA_MODEL` | `qwen3:8b` | writer model |
+| `OLLAMA_NUM_GPU` | `0` (CPU) | `-1` lets Ollama use the GPU (needs a recent NVIDIA driver) |
+| `FW_VOICE` | `soothing` | default voice preset |
+| `FW_CLIP` | `1` | `0` disables CLIP ranking |
+| `FW_ENCODER` | auto | force `libx264` / `h264_nvenc` |
+| `PEXELS_API_KEY`, `PIXABAY_API_KEY` | – | stock video |
+| `FW_S3_BUCKET`, `FW_S3_ENDPOINT` | – | mirror outputs to S3 / R2 / MinIO |
+| `FW_MUSIC_DIR` | `music/` | mood library ([music/README.md](music/README.md)) |
 
-Every stage degrades instead of crashing: no LLM → Wikipedia script; no image → drifting
-gradient card; flaky TTS/429s → retries with backoff.
+## Script format
 
-## Layout
+Write your own script and keep everything else automated:
 
-```
-videogen/research.py  Wikipedia facts, Commons/Pexels search, downloads
-videogen/youtube.py   yt-dlp: Creative Commons search, licence check, segment download, credits
-videogen/thumbnail.py Pillow thumbnails (landscape + vertical cover) in the brand style
-videogen/brands.py    channel presets (name, tagline); private ones load from local/ (gitignored)
-scripts/              hand-written scripts for --script
-videogen/script.py    LLM prompt, validation, fallback
-videogen/voice.py     TTS + word timings
-videogen/render.py    all ffmpeg: clips, captions, music, final mix/grade
-videogen/pipeline.py  orchestration + progress callback
-server.py, web/       stdlib HTTP server + single-page UI (job queue, progress, preview)
+```json
+{
+  "title": "Apollo 13", "subject": "Apollo 13", "format": "long", "mood": "tense",
+  "pronounce": {"Haise": "Haze"},
+  "scenes": [
+    {"narration": "Two hundred thousand miles from home, a bang shook the spacecraft ...", "keywords": ["Apollo 13 mission control"]},
+    {"narration": "...", "keywords": ["Apollo 13 lunar module Aquarius"], "anchor": false, "pause": 0.8, "chapter": "The lifeboat"}
+  ],
+  "thumbnail": {"label": "Apollo 13", "hook": "Houston, we've\nhad a problem", "scene": 0},
+  "youtube": {"title": "...", "description": "...", "tags": ["..."]}
+}
 ```
 
-## Notes from building it
+`anchor: false` uses keywords as-is; `chapter` starts a chapter (long-form); `rate` / `pause` tune pacing per scene.
 
-- **Why prose, then JSON:** with `format: json` the 7B model wrote 6–11 word fragments. Asking for
-  plain paragraphs gave proper 20–30 word narration with dates and names.
-- **CPU by default:** Ollama's CUDA runner crashed on this machine (`device kernel image is invalid`),
-  so `OLLAMA_NUM_GPU=0` is the default. A full 6-scene run is about 5–10 minutes on CPU.
-- **Known limitation:** a 7B model occasionally garbles a fact (e.g. merges two sentences from the
-  source). A stronger model or a fact-check pass against the source text would fix that.
-- Wikimedia rate-limits parallel downloads (HTTP 429), so media is fetched serially with backoff.
-- **YouTube footage is licence-checked twice:** the search uses YouTube's Creative Commons filter,
-  then each video's own metadata licence is verified before anything is downloaded. CC BY requires
-  credit, so every run with `--youtube` writes `<video>.credits.txt` (title, channel, URL, licence).
-  Music mixes and lyric videos are skipped by title because they're static cards with burned-in text.
+## Licensing of what you publish
 
-## How to run it
+Framewright's code is MIT. Media keeps its own licence: Commons files are credited automatically in
+the description and `.credits.txt`; Pexels/Pixabay don't require credit; YouTube clips are
+restricted to Creative Commons (CC BY) and credited. Kokoro is Apache-2.0. Check your music's licence.
 
-### 1. Install the tools (one time)
+## Roadmap
 
-| Tool | Windows | macOS |
-|---|---|---|
-| Python 3.11+ | `winget install Python.Python.3.11` | `brew install python` |
-| ffmpeg | `winget install Gyan.FFmpeg` | `brew install ffmpeg` |
-| Ollama | `winget install Ollama.Ollama` | `brew install ollama` |
-
-Restart the terminal afterwards so `python`, `ffmpeg` and `ollama` are on your PATH.
-
-### 2. Get the code and dependencies
-
-```bash
-git clone https://github.com/MicoleKurt/video-generator.git
-cd video-generator
-pip install -r requirements.txt
-ollama pull qwen2.5:7b
-```
-
-### 3. Generate a video
-
-**Web UI** (recommended):
-
-```bash
-python server.py
-```
-
-Open http://localhost:8000, type a topic (or click one of the examples), pick a length and press
-**Generate**. Progress shows step by step; when it finishes the video plays in the page with a
-**Download mp4** link and the generated script underneath.
-
-**Command line:**
-
-```bash
-python generate.py "the history of coffee" --scenes 6
-
-# add real Creative Commons YouTube footage (slower, ~3-4 min extra per scene)
-python generate.py "the history of coffee" --scenes 4 --youtube
-```
-
-In the web UI, tick **YouTube footage (Creative Commons, slower)**.
-
-The mp4 (plus a `.json` with the script) is written to `output/`. Intermediate files
-(voice clips, images, captions) are kept in `output/<topic>-<timestamp>/` for debugging.
-
-### 4. Channel mode: hand-written script + brand + thumbnails
-
-For a real channel you usually want to write (or edit) the script yourself and keep the rest
-automated. Put the script in a JSON file (see [scripts/example.json](scripts/example.json))
-and pick a brand preset:
-
-```bash
-python generate.py "the history of coffee" --script scripts/example.json --brand example
-```
-
-This skips research and the LLM, then does voice, footage, animation, captions and music as usual, plus:
-
-- **Brand lockup:** channel name, amber rule and title in the lower band, below the captions, so text never covers a face; matching end card
-- **Thumbnails:** `<video>.thumb.jpg` (1280x720, hook on a dark panel, subject kept clear) and `<video>.cover.jpg` (1080x1920)
-- **Upload metadata:** `<video>.youtube.json` with title, description and tags (and CC credits if YouTube footage was used)
-
-Script fields: `scenes[].narration`, `scenes[].keywords` (image searches), optional `scenes[].anchor: false`
-to use keywords exactly, `thumbnail.label` (name) / `thumbnail.hook` / `thumbnail.scene`, and `youtube.{title,description,tags}`.
-Brand presets live in [videogen/brands.py](videogen/brands.py); keep real channel presets private in
-`local/brands.local.json` (gitignored), which is merged in automatically.
-
-### 5. Optional settings (environment variables)
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `OLLAMA_MODEL` | `qwen2.5:7b` | Any Ollama model, e.g. `llama3.1:8b` |
-| `OLLAMA_NUM_GPU` | `0` (CPU) | Set `-1` to let Ollama use your GPU (much faster if it works) |
-| `PEXELS_API_KEY` | none | Free key from pexels.com/api: adds real stock **video** footage |
-| `PORT` | `8000` | Web UI port |
-
-### Troubleshooting
-
-- **Script falls back to Wikipedia sentences:** Ollama isn't running or the model isn't pulled.
-  Run `ollama list`; start it with `ollama serve`.
-- **`CUDA error` from Ollama:** keep `OLLAMA_NUM_GPU=0` (the default).
-- **`429 Too Many Requests` lines in the log:** Wikimedia throttling; the pipeline retries and
-  skips to the next image automatically.
-- **A run takes 5-10 minutes:** expected on CPU; most of it is the LLM and the zoom animation.
-
-### Tests
-
-```bash
-python tests/test_captions.py
-```
-
-## What I'd add next
-
-1. **Footage relevance scoring** — CLIP / vision model to rank candidate images against each
-   narration line; today relevance depends on search quality.
-2. **Real stock video by default** (Pexels/Pixabay) + crossfades between shots.
-3. **Better LLM** (Claude via API) for sharper hooks; keep local model as the free fallback.
-4. **Job queue + storage** (Redis/RQ or Postgres-backed, S3 output) so renders survive restarts
-   and run in parallel workers.
-5. Music from a licensed library matched to mood; brand templates (fonts/colors/intro) per channel.
-6. Auto-upload to YouTube Shorts/TikTok with generated title, description and tags.
+- TikTok / Instagram publishing once their APIs allow it without app review
+- On-screen maps and timeline graphics for long-form
+- A/B thumbnail variants from the title options

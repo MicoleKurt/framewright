@@ -3,212 +3,318 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Video Generator</title>
+<title>Framewright Studio</title>
+<link rel="icon" href="/assets/logo-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0e0d0b;
-    --panel: #151411;
-    --line: #2a2723;
-    --text: #ece7df;
-    --muted: #8d867b;
-    --faint: #5a554d;
-    --accent: #d9a35b;
-    --serif: "Instrument Serif", Georgia, serif;
-    --sans: "Inter", system-ui, sans-serif;
-    --mono: "JetBrains Mono", ui-monospace, monospace;
+    --bg: #0b0a0d; --bg2: #121016; --panel: #17141c; --panel2: #1e1a24; --line: #2a2531; --line2: #3a3343;
+    --text: #f3eee7; --muted: #a39cab; --faint: #6d6675;
+    --a1: #ffc15e; --a2: #ff6b4a; --a3: #c2367a; --ok: #59d69b; --err: #ff7b72;
+    --grad: linear-gradient(135deg, var(--a1), var(--a2) 55%, var(--a3));
+    --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --sans: "Inter", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+    --r: 14px;
   }
   * { box-sizing: border-box; margin: 0; }
-  body { background: var(--bg); color: var(--text); font: 15px/1.6 var(--sans); min-height: 100vh;
-         -webkit-font-smoothing: antialiased; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 32px 40px 64px; }
+  html, body { background: var(--bg); }
+  body { color: var(--text); font: 14.5px/1.55 var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased;
+         background: radial-gradient(1200px 500px at 85% -10%, rgba(255,107,74,.10), transparent 60%),
+                     radial-gradient(900px 400px at -10% 10%, rgba(194,54,122,.08), transparent 60%), var(--bg); }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  .wrap { max-width: 1320px; margin: 0 auto; padding: 18px 28px 64px; }
 
-  header { display: flex; justify-content: space-between; align-items: baseline;
-           padding-bottom: 20px; border-bottom: 1px solid var(--line); }
-  .brand { font: 14px/1 var(--mono); color: var(--muted); }
-  .brand i { color: var(--accent); }
-  .meta { font: 12px var(--mono); color: var(--faint); letter-spacing: .04em; }
+  /* header */
+  header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 0 22px; }
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+  .logo img { width: 34px; height: 34px; }
+  .logo b { font: 700 21px var(--display); letter-spacing: -.02em; }
+  .logo b span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .status { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  .pill { font: 500 11.5px var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
+          padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px; background: var(--bg2); }
+  .pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
+  .pill.on i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
 
-  main { display: grid; grid-template-columns: 1fr 380px; gap: 72px; padding-top: 64px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 28px; align-items: start; }
 
-  .eyebrow { font: 11px var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
-  h1 { font: 400 clamp(44px, 5vw, 64px)/1.05 var(--serif); letter-spacing: -.01em; margin: 0 0 18px; }
-  h1 em { color: var(--accent); }
-  .lede { color: var(--muted); max-width: 46ch; font-size: 16px; }
+  /* hero + create */
+  .hero h1 { font: 700 clamp(32px, 4vw, 50px)/1.02 var(--display); letter-spacing: -.035em; }
+  .hero h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { color: var(--muted); max-width: 58ch; margin-top: 10px; font-size: 15px; }
+  .card { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 1px solid var(--line);
+          border-radius: var(--r); padding: 18px; }
+  .create { margin-top: 22px; }
+  .topic { display: flex; gap: 10px; align-items: center; background: var(--bg); border: 1px solid var(--line2);
+           border-radius: 12px; padding: 6px 6px 6px 16px; transition: border-color .2s, box-shadow .2s; }
+  .topic:focus-within { border-color: var(--a2); box-shadow: 0 0 0 4px rgba(255,107,74,.12); }
+  .topic input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; font: 500 19px var(--display); padding: 10px 0; }
+  .topic input::placeholder { color: var(--faint); font-weight: 400; }
+  .go { border: 0; border-radius: 10px; padding: 12px 20px; font-weight: 600; cursor: pointer; color: #1a0f0a;
+        background: var(--grad); white-space: nowrap; transition: transform .15s, filter .2s; }
+  .go:hover { filter: brightness(1.08); } .go:active { transform: scale(.98); }
+  .go:disabled { filter: grayscale(.8) brightness(.7); cursor: default; }
 
-  form { margin-top: 44px; }
-  .field { display: flex; align-items: center; border-bottom: 1px solid var(--line);
-           transition: border-color .2s; }
-  .field:focus-within { border-color: var(--text); }
-  .field input { flex: 1; background: none; border: 0; outline: 0; color: var(--text);
-                 font: 30px/1.3 var(--serif); padding: 14px 0; min-width: 0; }
-  .field input::placeholder { color: var(--faint); font-style: italic; }
-  button { background: var(--text); color: var(--bg); border: 0; border-radius: 999px;
-           font: 500 14px var(--sans); padding: 12px 22px; cursor: pointer; white-space: nowrap;
-           transition: background .2s, opacity .2s; }
-  button:hover { background: var(--accent); }
-  button:disabled { opacity: .35; cursor: default; background: var(--text); }
+  .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 14px; }
+  .ctl label { display: block; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
+  .seg { display: flex; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .seg button { flex: 1; border: 0; background: none; padding: 7px 6px; white-space: nowrap; border-radius: 7px; cursor: pointer; color: var(--muted); font-weight: 500; }
+  .seg button.on { background: var(--panel2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line2); }
+  select, .num { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; outline: 0; }
+  select:focus, .num:focus { border-color: var(--line2); }
+  .row2 { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-top: 14px; }
+  .check { display: flex; gap: 8px; align-items: center; color: var(--muted); cursor: pointer; font-size: 13px; }
+  .check input { accent-color: var(--a2); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1px solid var(--line); background: none; border-radius: 999px; padding: 5px 11px; color: var(--muted); cursor: pointer; font-size: 12.5px; }
+  .chip:hover { color: var(--text); border-color: var(--line2); }
 
-  .opts { display: flex; gap: 28px; margin-top: 18px; font-size: 13px; color: var(--muted); align-items: center; }
-  .opts select { background: none; color: var(--text); border: 0; font: inherit; cursor: pointer; }
-  .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-  .check input { accent-color: var(--accent); }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
-  .chip { font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
-          padding: 6px 14px; cursor: pointer; background: none; transition: color .2s, border-color .2s; }
-  .chip:hover { color: var(--text); border-color: var(--faint); background: none; }
+  /* queue */
+  .sec { display: flex; align-items: baseline; justify-content: space-between; margin: 26px 0 10px; }
+  .sec h2 { font: 600 15px var(--display); letter-spacing: -.01em; }
+  .sec span { font: 12px var(--mono); color: var(--faint); }
+  .queue { display: grid; gap: 8px; }
+  .job { display: grid; grid-template-columns: 54px 1fr auto; gap: 12px; align-items: center; padding: 10px 12px;
+         border: 1px solid var(--line); border-radius: 12px; background: var(--bg2); cursor: pointer; transition: border-color .2s; }
+  .job:hover, .job.sel { border-color: var(--line2); background: var(--panel); }
+  .job .th { width: 54px; height: 54px; border-radius: 8px; background: var(--panel2) center/cover; display: grid; place-items: center;
+             font: 600 10px var(--mono); color: var(--faint); }
+  .job .t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .job .m { font: 12px var(--mono); color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 3px; background: var(--line); border-radius: 3px; margin-top: 6px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .6s ease; }
+  .tag { font: 500 11px var(--mono); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .tag.done { color: var(--ok); border-color: rgba(89,214,155,.35); }
+  .tag.error { color: var(--err); border-color: rgba(255,123,114,.35); }
+  .tag.running { color: var(--a1); border-color: rgba(255,193,94,.35); }
+  .empty { color: var(--faint); font-size: 13px; padding: 14px; border: 1px dashed var(--line); border-radius: 12px; text-align: center; }
 
-  .steps { list-style: none; padding: 0; margin-top: 56px; border-top: 1px solid var(--line); }
-  .steps li { display: grid; grid-template-columns: 36px 1fr auto; gap: 12px; padding: 14px 0;
-              border-bottom: 1px solid var(--line); color: var(--faint); font-size: 14px; transition: color .3s; }
-  .steps .n { font: 12px var(--mono); padding-top: 2px; }
-  .steps .s { font: 12px var(--mono); }
-  .steps li.active { color: var(--text); }
-  .steps li.active .s { color: var(--accent); }
-  .steps li.done { color: var(--muted); }
+  /* preview */
+  aside { position: sticky; top: 18px; }
+  .stage { display: grid; place-items: center; background: #050407; border: 1px solid var(--line); border-radius: var(--r);
+           overflow: hidden; position: relative; aspect-ratio: 16 / 9; transition: aspect-ratio .3s; }
+  .stage.v { aspect-ratio: 9 / 13; }
+  .stage video { width: 100%; height: 100%; object-fit: contain; display: none; background: #000; }
+  .stage.ready video { display: block; }
+  .ph { text-align: center; color: var(--faint); padding: 24px; }
+  .ph img { width: 46px; opacity: .55; margin-bottom: 10px; }
+  .ph p { font: 500 15px var(--display); }
+  .stage.ready .ph { display: none; }
+  .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 12px; }
+  .steps div { font: 500 10.5px var(--mono); color: var(--faint); text-align: center; padding-top: 8px; border-top: 2px solid var(--line); letter-spacing: .04em; }
+  .steps div.done { color: var(--muted); border-color: var(--line2); }
+  .steps div.active { color: var(--text); border-image: var(--grad) 1; }
+  .msg { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; font-size: 13px; color: var(--muted); min-height: 20px; }
+  .msg .err { color: var(--err); }
+  .tabs { display: flex; gap: 4px; margin-top: 16px; border-bottom: 1px solid var(--line); }
+  .tabs button { border: 0; background: none; padding: 9px 12px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
+  .tabs button.on { color: var(--text); border-color: var(--a2); }
+  .pane { display: none; padding-top: 14px; } .pane.on { display: block; }
+  .script li { list-style: none; padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--text); }
+  .script ol { padding: 0; }
+  .script h4 { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; margin: 14px 0 2px;
+               background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .field { margin-bottom: 12px; }
+  .field .h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .field .h b { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .copy { border: 1px solid var(--line); background: var(--bg2); color: var(--muted); border-radius: 8px; padding: 3px 9px; cursor: pointer; font-size: 12px; }
+  .copy:hover { color: var(--text); }
+  .field pre { white-space: pre-wrap; word-break: break-word; font: 13px/1.5 var(--sans); background: var(--bg2); border: 1px solid var(--line);
+               border-radius: 10px; padding: 10px 12px; max-height: 260px; overflow: auto; }
+  .thumbs img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; margin-bottom: 10px; }
+  .dl { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .dl a { text-decoration: none; color: var(--text); border: 1px solid var(--line2); border-radius: 9px; padding: 7px 12px; font-size: 13px; }
+  .dl a:hover { border-color: var(--a2); }
+  footer { margin-top: 40px; color: var(--faint); font-size: 12.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 
-  aside { position: sticky; top: 32px; align-self: start; }
-  .frame { aspect-ratio: 9 / 16; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
-           overflow: hidden; position: relative; display: grid; place-items: center; }
-  .frame video { width: 100%; height: 100%; object-fit: cover; display: none; }
-  .frame.ready video { display: block; }
-  .placeholder { text-align: center; padding: 32px; }
-  .placeholder p { font: italic 22px/1.3 var(--serif); color: var(--faint); }
-  .frame.ready .placeholder { display: none; }
-  .bar { position: absolute; left: 0; bottom: 0; height: 2px; width: 0; background: var(--accent);
-         transition: width .6s ease; }
-  .caption { margin-top: 16px; display: flex; justify-content: space-between; align-items: center;
-             font-size: 13px; color: var(--muted); min-height: 24px; }
-  .caption a { color: var(--text); text-decoration: none; border-bottom: 1px solid var(--faint); }
-  .caption a:hover { border-color: var(--accent); }
-  .error { color: #d98b7a; }
-
-  .script { margin-top: 28px; }
-  .script ol { padding: 0; list-style: none; counter-reset: s; }
-  .script li { counter-increment: s; padding: 12px 0; border-top: 1px solid var(--line);
-               font: 17px/1.45 var(--serif); color: var(--text); }
-  .script li::before { content: counter(s, decimal-leading-zero); font: 11px var(--mono);
-                       color: var(--faint); display: block; margin-bottom: 4px; }
-
-  @media (max-width: 880px) {
-    .wrap { padding: 20px 16px 48px; }
-    main { grid-template-columns: 1fr; gap: 48px; padding-top: 40px; }
-    aside { position: static; max-width: 380px; width: 100%; margin: 0 auto; }
-    .field input { font-size: 24px; }
-    .meta { display: none; }
+  @media (max-width: 1080px) { .grid { grid-template-columns: 1fr; } aside { position: static; } }
+  @media (max-width: 640px) {
+    .wrap { padding: 12px 16px 48px; }
+    header { flex-direction: column; align-items: flex-start; }
+    .status { justify-content: flex-start; }
+    .topic { flex-direction: column; align-items: stretch; padding: 8px; }
+    .topic input { padding: 6px 8px; font-size: 17px; }
+    .steps div { font-size: 9px; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="brand">videogen</div>
-    <div class="meta">v0.1 prototype</div>
+    <a class="logo" href="/"><img src="/assets/logo-mark.svg" alt=""><b>frame<span>wright</span></b></a>
+    <div class="status" id="status"></div>
   </header>
 
-  <main>
+  <div class="grid">
     <section>
-      <h1>Video generator</h1>
-      <p class="lede">Enter a topic. It pulls facts from Wikipedia, writes a script with a local
-        model, records a voiceover, finds photos on Wikimedia Commons and renders a 1080×1920 mp4
-        with captions and background music. A run takes a few minutes on a laptop CPU.</p>
+      <div class="hero">
+        <h1>Topic in. <em>Publish-ready</em> video out.</h1>
+        <p>Shorts or long-form documentaries, written by a local model from real sources, narrated in a calm
+          offline voice, cut from relevance-ranked footage, packaged with chapters, captions and a thumbnail. Free, on your machine.</p>
+      </div>
 
-      <form id="form">
-        <div class="field">
-          <input id="topic" placeholder="e.g. the history of coffee" autocomplete="off" required>
-          <button id="go" type="submit">Generate</button>
+      <form class="card create" id="form">
+        <div class="topic">
+          <input id="topic" placeholder="e.g. How the Apollo 13 crew made it home" autocomplete="off" required>
+          <button class="go" id="go" type="submit">Generate</button>
         </div>
-        <div class="opts">
-          <label>Length:
-            <select id="scenes">
-              <option value="4">4 scenes (~30s)</option>
-              <option value="6" selected>6 scenes (~45s)</option>
-              <option value="8">8 scenes (~60s)</option>
-            </select>
-          </label>
-          <label class="check"><input type="checkbox" id="youtube"> YouTube footage (Creative Commons, slower)</label>
+        <div class="controls">
+          <div class="ctl"><label>Format</label>
+            <div class="seg" id="fmt"><button type="button" data-v="short" class="on">Short</button><button type="button" data-v="long">Long-form</button></div>
+          </div>
+          <div class="ctl" id="lenCtl"><label id="lenLabel">Length</label>
+            <select id="len"></select>
+          </div>
+          <div class="ctl"><label>Voice</label><select id="voice"></select></div>
+          <div class="ctl"><label>Brand</label><select id="brand"><option value="">None</option></select></div>
         </div>
-        <div class="chips">
-          <button type="button" class="chip">The Roman aqueducts</button>
-          <button type="button" class="chip">How lighthouses work</button>
-          <button type="button" class="chip">The Apollo 11 landing</button>
-          <button type="button" class="chip">Japanese tea ceremony</button>
+        <div class="row2">
+          <label class="check"><input type="checkbox" id="cc"> Creative Commons YouTube clips <span style="color:var(--faint)">(slower)</span></label>
+          <div class="chips" id="chips"></div>
         </div>
       </form>
 
-      <ol class="steps" id="steps"></ol>
+      <div class="sec"><h2>Queue</h2><span id="qcount"></span></div>
+      <div class="queue" id="queue"><div class="empty">Renders you start appear here and survive restarts.</div></div>
     </section>
 
     <aside>
-      <div class="frame" id="frame">
-        <div class="placeholder"><p>No video yet</p></div>
+      <div class="stage" id="stage">
+        <div class="ph"><img src="/assets/logo-mark.svg" alt=""><p>Your video renders here</p></div>
         <video id="video" controls playsinline></video>
-        <div class="bar" id="bar"></div>
       </div>
-      <div class="caption" id="caption"><span>Nothing rendered yet</span></div>
-      <div class="script" id="script"></div>
+      <div class="steps" id="steps"></div>
+      <div class="msg" id="msg"><span>Pick a topic to start.</span></div>
+      <div class="tabs" id="tabs">
+        <button class="on" data-p="script">Script</button><button data-p="publish">YouTube</button><button data-p="thumb">Thumbnail</button>
+      </div>
+      <div class="pane on" id="p-script"><div class="script" id="script"><p style="color:var(--faint)">The script and chapters show up here.</p></div></div>
+      <div class="pane" id="p-publish"><div id="publish"><p style="color:var(--faint)">Title, description with chapter timestamps and tags, ready to paste.</p></div></div>
+      <div class="pane" id="p-thumb"><div class="thumbs" id="thumbs"><p style="color:var(--faint)">Generated thumbnails show up here.</p></div></div>
+      <div class="dl" id="dl"></div>
     </aside>
-  </main>
+  </div>
+
+  <footer><span>Framewright · open source · runs locally</span><span>Ollama · Kokoro / Edge TTS · CLIP · ffmpeg</span></footer>
 </div>
 
 <script>
-const STEPS = [
-  ["Research", "Researching"], ["Script", "Writing script"], ["Voice", "Recording voiceover"],
-  ["Images", "Finding footage"], ["Animate", "Animating"], ["Encode", "Mixing"],
-];
 const $ = (id) => document.getElementById(id);
-const stepsEl = $("steps");
-stepsEl.innerHTML = STEPS.map(([name], i) =>
-  `<li><span class="n">0${i + 1}</span><span>${name}</span><span class="s"></span></li>`).join("");
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const STEPS = [["Script", /^(Using|Research|Writing|Planning|Choosing)/], ["Voice", /^Recording/], ["Visuals", /^Finding/],
+               ["Animate", /^(Animating|Crossfading)/], ["Mix", /^Mixing/], ["Done", /^Done/]];
+const IDEAS = { short: ["The history of coffee", "Why lighthouses blink", "The Great Emu War"],
+                long: ["How the Apollo 13 crew made it home", "The fall of the Library of Alexandria", "The race to the South Pole"] };
+let state = { fmt: "short", selected: null, timer: null };
+
+function setFmt(f) {
+  state.fmt = f;
+  [...$("fmt").children].forEach((b) => b.classList.toggle("on", b.dataset.v === f));
+  const opts = f === "long" ? [[6, "~6 min"], [8, "~8 min"], [10, "~10 min"], [12, "~12 min"], [15, "~15 min"]]
+                            : [[4, "4 scenes · ~30s"], [6, "6 scenes · ~45s"], [8, "8 scenes · ~60s"]];
+  $("len").innerHTML = opts.map(([v, l]) => `<option value="${v}" ${v === (f === "long" ? 10 : 6) ? "selected" : ""}>${l}</option>`).join("");
+  $("chips").innerHTML = IDEAS[f].map((t) => `<button type="button" class="chip">${esc(t)}</button>`).join("");
+  $("stage").classList.toggle("v", f === "short");
+}
+$("fmt").addEventListener("click", (e) => e.target.dataset.v && setFmt(e.target.dataset.v));
+$("chips").addEventListener("click", (e) => { if (e.target.classList.contains("chip")) { $("topic").value = e.target.textContent; $("topic").focus(); } });
+$("tabs").addEventListener("click", (e) => {
+  const p = e.target.dataset.p; if (!p) return;
+  [...$("tabs").children].forEach((b) => b.classList.toggle("on", b === e.target));
+  document.querySelectorAll(".pane").forEach((el) => el.classList.toggle("on", el.id === "p-" + p));
+});
+$("steps").innerHTML = STEPS.map(([n]) => `<div>${n}</div>`).join("");
+
+async function loadPresets() {
+  try {
+    const p = await (await fetch("/api/presets")).json();
+    $("voice").innerHTML = p.voices.map((v) => `<option value="${v.id}" ${v.id === p.default_voice ? "selected" : ""}
+      ${v.engine === "kokoro" && !p.kokoro ? "disabled" : ""}>${v.id} · ${v.engine}</option>`).join("");
+    $("brand").innerHTML += p.brands.map((b) => `<option value="${esc(b.id)}">${esc(b.name)}</option>`).join("");
+    const pills = [["Kokoro voice", p.kokoro], ["CLIP ranking", p.clip], ["Pexels", p.stock.pexels], ["Pixabay", p.stock.pixabay],
+                   [p.encoder === "h264_nvenc" ? "GPU encode" : "CPU encode", p.encoder === "h264_nvenc"]];
+    $("status").innerHTML = pills.map(([l, on]) => `<span class="pill ${on ? "on" : ""}"><i></i>${l}</span>`).join("");
+  } catch { $("status").innerHTML = `<span class="pill">offline</span>`; }
+}
 
 function paintSteps(msg, status) {
-  const idx = STEPS.findIndex(([, key]) => msg.startsWith(key));
-  [...stepsEl.children].forEach((li, i) => {
-    const done = status === "done" || i < idx, active = status === "running" && i === idx;
-    li.className = done ? "done" : active ? "active" : "";
-    li.querySelector(".s").textContent = done ? "done" : active ? (msg.match(/\d+\/\d+/) || ["working"])[0] : "";
+  const idx = status === "done" ? STEPS.length - 1 : STEPS.findIndex(([, re]) => re.test(msg || ""));
+  [...$("steps").children].forEach((el, i) => {
+    el.className = status === "done" || i < idx ? "done" : (status === "running" && i === idx ? "active" : "");
   });
 }
 
-const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+async function refreshQueue() {
+  const jobs = await (await fetch("/api/jobs")).json();
+  $("qcount").textContent = jobs.length ? `${jobs.filter((j) => j.status === "running" || j.status === "queued").length} active · ${jobs.length} total` : "";
+  if (!jobs.length) return;
+  $("queue").innerHTML = jobs.map((j) => `
+    <div class="job ${j.id === state.selected ? "sel" : ""}" data-id="${j.id}">
+      <div class="th" style="${j.result && j.result.thumb ? `background-image:url('${j.result.thumb}')` : ""}">${j.result && j.result.thumb ? "" : esc((j.params.format || "short").toUpperCase())}</div>
+      <div style="min-width:0"><div class="t">${esc((j.result && j.result.title) || j.params.topic)}</div>
+        <div class="m">${esc(j.params.format || "short")} · ${esc(j.msg || "")}</div>
+        ${j.status === "running" || j.status === "queued" ? `<div class="bar"><i style="width:${j.pct || 0}%"></i></div>` : ""}</div>
+      <span class="tag ${j.status}">${j.status}</span>
+    </div>`).join("");
+}
+$("queue").addEventListener("click", (e) => { const el = e.target.closest(".job"); if (el) select(el.dataset.id); });
 
-async function poll(id) {
+async function select(id) {
+  state.selected = id; clearTimeout(state.timer);
   const job = await (await fetch(`/api/jobs/${id}`)).json();
-  $("bar").style.width = `${job.pct || 0}%`;
-  paintSteps(job.msg || "", job.status);
-  if (job.status === "error") {
-    $("caption").innerHTML = `<span class="error">${esc(job.msg)}</span>`;
-    return done();
-  }
-  if (job.status !== "done") {
-    $("caption").innerHTML = `<span>${esc(job.msg)}</span><span>${Math.round(job.pct)}%</span>`;
-    return setTimeout(() => poll(id), 1200);
-  }
-  $("video").src = job.video;
-  $("frame").classList.add("ready");
-  $("bar").style.width = "0";
-  $("caption").innerHTML = `<span>${esc(job.script.title)}</span><a href="${job.video}" download>Download mp4</a>`;
-  $("script").innerHTML = `<div class="eyebrow">Script</div><ol>${
-    job.script.scenes.map((s) => `<li>${esc(s.narration)}</li>`).join("")}</ol>`;
-  done();
+  const fmt = job.params.format || "short";
+  $("stage").classList.toggle("v", fmt === "short");
+  paintSteps(job.msg, job.status);
+  if (job.status === "error") $("msg").innerHTML = `<span class="err">${esc(job.msg)}</span>`;
+  else if (job.status !== "done") $("msg").innerHTML = `<span>${esc(job.msg)}</span><span>${Math.round(job.pct || 0)}%</span>`;
+  if (job.status === "done" && job.result) show(job.result);
+  else { $("stage").classList.remove("ready"); $("video").removeAttribute("src"); $("dl").innerHTML = ""; }
+  if (job.status === "running" || job.status === "queued") state.timer = setTimeout(() => select(id), 1500);
+  else resetGo();
+  refreshQueue();
 }
 
-function done() { $("go").disabled = false; $("go").textContent = "Generate"; }
+function copyBtn(text) { return `<button class="copy" data-copy="${esc(text)}">Copy</button>`; }
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".copy"); if (!b) return;
+  navigator.clipboard.writeText(b.dataset.copy).then(() => { b.textContent = "Copied"; setTimeout(() => (b.textContent = "Copy"), 1200); });
+});
+
+function show(r) {
+  if (!$("video").src.endsWith(r.video)) $("video").src = r.video;
+  $("stage").classList.add("ready");
+  $("msg").innerHTML = `<span>${esc(r.title)}</span><span>${esc(r.format)}</span>`;
+  let html = "<ol>";
+  for (const s of r.scenes) { if (s.chapter) html += `</ol><h4>${esc(s.chapter)}</h4><ol>`; html += `<li>${esc(s.narration)}</li>`; }
+  $("script").innerHTML = html + "</ol>";
+  const y = r.youtube || {}, tags = (y.tags || []).join(", ");
+  $("publish").innerHTML = [["Title", y.title], ["Description", y.description], ["Tags", tags]]
+    .map(([k, v]) => `<div class="field"><div class="h"><b>${k}</b>${copyBtn(v || "")}</div><pre>${esc(v || "-")}</pre></div>`).join("")
+    + ((y.title_options || []).length > 1 ? `<div class="field"><div class="h"><b>Other title options</b></div><pre>${esc(y.title_options.slice(1).join("\n"))}</pre></div>` : "");
+  $("thumbs").innerHTML = [r.thumb, r.cover].filter(Boolean).map((u) => `<img src="${u}" alt="thumbnail">`).join("") || `<p style="color:var(--faint)">No thumbnail.</p>`;
+  $("dl").innerHTML = [["MP4", r.video], ["Thumbnail", r.thumb], ["Cover 9:16", r.cover], ["Captions .srt", r.srt]]
+    .filter(([, u]) => u).map(([l, u]) => `<a href="${u}" download>${l}</a>`).join("");
+}
+
+function resetGo() { $("go").disabled = false; $("go").textContent = "Generate"; }
 
 $("form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  $("go").disabled = true; $("go").textContent = "Rendering";
-  $("frame").classList.remove("ready"); $("script").innerHTML = "";
-  const res = await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ topic: $("topic").value, scenes: +$("scenes").value, youtube: $("youtube").checked }) });
+  $("go").disabled = true; $("go").textContent = "Queued";
+  const len = +$("len").value;
+  const body = { topic: $("topic").value, format: state.fmt, voice: $("voice").value, brand: $("brand").value,
+                 youtube: $("cc").checked, ...(state.fmt === "long" ? { minutes: len } : { scenes: len }) };
+  const res = await fetch("/api/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const { id, error } = await res.json();
-  if (error) { $("caption").innerHTML = `<span class="error">${esc(error)}</span>`; return done(); }
-  poll(id);
+  if (error) { $("msg").innerHTML = `<span class="err">${esc(error)}</span>`; return resetGo(); }
+  select(id);
 });
 
-document.querySelectorAll(".chip").forEach((c) =>
-  c.addEventListener("click", () => { $("topic").value = c.textContent; $("topic").focus(); }));
+setFmt("short");
+loadPresets();
+refreshQueue();
+setInterval(refreshQueue, 4000);
 </script>
 </body>
 </html>

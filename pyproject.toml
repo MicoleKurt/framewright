@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "framewright"
+version = "1.0.0"
+description = "Topic in, publish-ready YouTube video out. Shorts and long-form, free and local."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Micole Kurt Gonda" }]
+dependencies = ["edge-tts>=7.2", "requests>=2.31", "Pillow>=10", "yt-dlp>=2025.1"]
+
+[project.optional-dependencies]
+voice = ["kokoro>=0.9.4", "soundfile>=0.12"]
+clip = ["open_clip_torch>=2.24"]
+youtube = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2", "mcp>=1.10"]
+s3 = ["boto3>=1.34"]
+all = ["framewright[voice,clip,youtube]"]
+
+[project.scripts]
+framewright = "framewright.__main__:main"
+framewright-mcp = "framewright.mcp_server:main"
+
+[tool.setuptools]
+packages = ["framewright"]

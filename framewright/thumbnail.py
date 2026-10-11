@@ -4,16 +4,23 @@ Text sits on the darker side of the frame and never over the centre, so a face s
 """
 from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageFont, ImageOps
 
-SERIF = "C:/Windows/Fonts/georgia.ttf"
-SERIF_BOLD = "C:/Windows/Fonts/georgiab.ttf"
+# Georgia on Windows/macOS, DejaVu/Liberation Serif on Linux; Pillow's bundled font as a last resort
+SERIF = ["C:/Windows/Fonts/georgia.ttf", "/Library/Fonts/Georgia.ttf", "/System/Library/Fonts/Supplemental/Georgia.ttf",
+         "/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf", "/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf"]
+SERIF_BOLD = ["C:/Windows/Fonts/georgiab.ttf", "/Library/Fonts/Georgia Bold.ttf",
+              "/System/Library/Fonts/Supplemental/Georgia Bold.ttf",
+              "/usr/share/fonts/truetype/dejavu/DejaVuSerif-Bold.ttf",
+              "/usr/share/fonts/truetype/liberation/LiberationSerif-Bold.ttf"]
 INK, MUTED, AMBER = (244, 240, 232), (200, 196, 188), (200, 143, 59)
 
 
-def _font(path: str, size: int) -> ImageFont.FreeTypeFont:
-    try:
-        return ImageFont.truetype(path, size)
-    except OSError:  # non-Windows: fall back to Pillow's bundled font
-        return ImageFont.load_default(size)
+def _font(paths: list[str] | str, size: int) -> ImageFont.FreeTypeFont:
+    for path in [paths] if isinstance(paths, str) else paths:
+        try:
+            return ImageFont.truetype(path, size)
+        except OSError:
+            continue
+    return ImageFont.load_default(size)
 
 
 def _grade(img: Image.Image) -> Image.Image:
@@ -33,10 +40,17 @@ def _spaced_width(draw, text: str, font, spacing: int) -> float:
     return sum(draw.textlength(ch, font=font) + spacing for ch in text) - spacing
 
 
-def make(image: str, hook: str, out: str, kicker: str = "", label: str = "", size=(1280, 720)) -> str:
+def _rgb(hex_rgb: str | None) -> tuple[int, int, int]:
+    h = (hex_rgb or "").lstrip("#")
+    return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4)) if len(h) == 6 else AMBER
+
+
+def make(image: str, hook: str, out: str, kicker: str = "", label: str = "", size=(1280, 720),
+         accent: str | None = None) -> str:
     """Landscape (1280x720) thumbnail: the image fills the right ~60% and feathers into a dark
     panel on the left that holds the hook, so the text never covers the subject."""
     w, h = size
+    amber = _rgb(accent)
     iw = int(w * 0.62)
     photo = _grade(ImageOps.fit(Image.open(image).convert("RGB"), (iw, h), centering=(0.5, 0.35)))
     base = Image.new("RGB", size, (12, 11, 10))
@@ -61,8 +75,8 @@ def make(image: str, hook: str, out: str, kicker: str = "", label: str = "", siz
     top = (h - line_h * len(lines)) / 2 + 40
     if label:  # who the story is about: name recognition above the curiosity hook
         lf = _fit_spaced(d, label.upper(), SERIF_BOLD, 42, 6, w * 0.52)
-        _spaced(d, (x, top - 112), label.upper(), lf, AMBER, 6)
-    d.rectangle((x, top - 44, x + 120, top - 39), fill=AMBER)
+        _spaced(d, (x, top - 112), label.upper(), lf, amber, 6)
+    d.rectangle((x, top - 44, x + 120, top - 39), fill=amber)
     for i, line in enumerate(lines):
         d.text((x + 3, top + i * line_h + 4), line, font=big, fill=(0, 0, 0))  # soft drop shadow
         d.text((x, top + i * line_h), line, font=big, fill=INK)
@@ -72,7 +86,7 @@ def make(image: str, hook: str, out: str, kicker: str = "", label: str = "", siz
     return out
 
 
-def _fit_spaced(d, text: str, path: str, size: int, spacing: int, max_w: float):
+def _fit_spaced(d, text: str, path, size: int, spacing: int, max_w: float):
     font = _font(path, size)
     while _spaced_width(d, text, font, spacing) > max_w and size > 18:
         size -= 2
@@ -80,9 +94,11 @@ def _fit_spaced(d, text: str, path: str, size: int, spacing: int, max_w: float):
     return font
 
 
-def make_vertical(image: str, hook: str, out: str, kicker: str = "", label: str = "") -> str:
+def make_vertical(image: str, hook: str, out: str, kicker: str = "", label: str = "",
+                  accent: str | None = None) -> str:
     """1080x1920 cover frame for Shorts: hook in the lower band, image above."""
     w, h = 1080, 1920
+    amber = _rgb(accent)
     base = _grade(ImageOps.fit(Image.open(image).convert("RGB"), (w, h), centering=(0.5, 0.35)))
     shade = Image.new("L", (w, h))
     for y in range(h):
@@ -94,8 +110,8 @@ def make_vertical(image: str, hook: str, out: str, kicker: str = "", label: str 
     y = h - 260 - len(lines) * 140
     if label:
         lf = _fit_spaced(d, label.upper(), SERIF_BOLD, 52, 8, w * 0.86)
-        _spaced(d, ((w - _spaced_width(d, label.upper(), lf, 8)) / 2, y - 130), label.upper(), lf, AMBER, 8)
-    d.rectangle((w / 2 - 70, y - 50, w / 2 + 70, y - 45), fill=AMBER)
+        _spaced(d, ((w - _spaced_width(d, label.upper(), lf, 8)) / 2, y - 130), label.upper(), lf, amber, 8)
+    d.rectangle((w / 2 - 70, y - 50, w / 2 + 70, y - 45), fill=amber)
     for i, line in enumerate(lines):
         tw = d.textlength(line, font=big)
         d.text(((w - tw) / 2, y + i * 140), line, font=big, fill=INK)
