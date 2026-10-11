@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40" role="img" aria-label="Framewright">
-  <rect x="2" y="2" width="36" height="36" rx="8" fill="#0c0c0c" stroke="#8f8f8f" stroke-width="2"/>
-  <path d="M16 13.5v13l10.5-6.5z" fill="#ededed"/>
+  <rect width="40" height="40" rx="9" fill="#0c0c0c"/>
+  <path d="M7.5 15V7.5H15M32.5 25v7.5H25" fill="none" stroke="#6f6f6f" stroke-width="1.4"/>
+  <path d="M14 11h13v3.6h-9.4v3.4h7.2v3.6h-7.2V29H14z" fill="#ededed"/>
 </svg>
