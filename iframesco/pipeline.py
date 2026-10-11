@@ -73,22 +73,28 @@ def _gather(scene: dict, idx: int, work: str, subject: str, fmt, ranker: relevan
             shots: int, use_youtube: bool, credits: list) -> list[dict]:
     cands = _candidates(scene, subject, fmt, use_youtube, work, idx, credits)
     text = scene["narration"] + " " + " ".join(scene.get("keywords", []))
-    chosen = []
-    for c in ranker.rank(text, cands, keep=shots + 2):
-        if len(chosen) == shots:
-            break
-        try:
-            if "file" in c:
-                path = c["file"]
-            else:
-                ext = "mp4" if c["kind"] == "video" else "jpg"
-                path = research.download(c["url"], f"{work}/s{idx}_{len(chosen)}.{ext}")
-            chosen.append({**c, "path": path})
-            if c.get("source") == "Wikimedia Commons" and c.get("license") not in ("Public domain", "CC0"):
-                credits.append({"title": c.get("title", ""), "channel": c.get("credit", ""),
-                                "url": c.get("page", ""), "license": c.get("license", "")})
-        except Exception as e:
-            print(f"[media] skip {c.get('url')}: {e}")
+    chosen: list[dict] = []
+
+    def take(pool: list[dict]) -> None:
+        for c in pool:
+            if len(chosen) == shots:
+                return
+            try:
+                if "file" in c:
+                    path = c["file"]
+                else:
+                    ext = "mp4" if c["kind"] == "video" else "jpg"
+                    path = research.download(c["url"], f"{work}/s{idx}_{len(chosen)}.{ext}")
+                chosen.append({**c, "path": path})
+                if c.get("source") == "Wikimedia Commons" and c.get("license") not in ("Public domain", "CC0"):
+                    credits.append({"title": c.get("title", ""), "channel": c.get("credit", ""),
+                                    "url": c.get("page", ""), "license": c.get("license", "")})
+            except Exception as e:
+                print(f"[media] skip {c.get('url')}: {e}")
+
+    take(ranker.rank(text, cands, keep=shots + 2))
+    if not chosen:  # all duplicates of earlier shots or failed: take search order, not a blank card
+        take(cands[:shots + 2])
     return chosen
 
 
@@ -149,6 +155,7 @@ def generate(topic: str, out_dir: str = "output", fmt: str = "short", scenes: in
         durations.append(d)
         offset += d
     chapters = chapter_list(plan, starts) if F.name == "long" else []
+    _write_json(f"{work}/words.json", words)  # lets a render be re-captioned/re-mixed without re-voicing
     render.captions_ass(words, f"{work}/captions.ass", plan["title"], brand=brand, chapters=chapters)
 
     # ------------------------------------------------ visuals

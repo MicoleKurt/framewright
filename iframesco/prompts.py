@@ -30,10 +30,14 @@ SHORT_NARRATION = """Write the narration for a YouTube Short (under 60 seconds) 
 SOURCE:
 {facts}
 
-Write exactly {n} paragraphs separated by blank lines, 2 sentences each, 20 to 35 words per paragraph.
-Paragraph 1 opens with the single most surprising true fact (the hook) - no setup before it.
-Paragraph 2 makes a specific promise of what the viewer is about to learn.
-The last paragraph pays off the hook and ends with a short closing line.
+Write exactly {n} paragraphs separated by blank lines, 2 sentences each, 20 to 30 words per paragraph.
+Follow this shape (a proven Shorts template):
+1. HOOK: the famous end, then a surprising true loss, twist or myth-flip. First sentence 14 words or fewer. Do not answer it yet.
+2. REWIND: jump back to a year and the lowest point.
+3. RISE: a first real win, with a name and a number.
+4. CONFLICT: the betrayal or setback, with concrete names, dates and numbers.
+5. TURN: the decision that changed everything.
+6. PAYOFF: close the hook from paragraph 1, and echo its wording in the last sentence so the video loops.
 {style}"""
 
 QUERIES = """For each numbered narration line below, give 2 image search queries of 2-4 words

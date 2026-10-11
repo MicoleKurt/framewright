@@ -30,25 +30,29 @@ class Format:
         """Where burned-in text goes on a vertical canvas. Everything is derived from the safe
         zone so captions, the title card and the end card cannot drift into the platform UI.
 
-        From the bottom up: [platform UI] > gap > captions (2 lines) > gap > title/end card.
+        Captions sit just above the bottom UI zone. The title card and end card sit at the TOP,
+        just below the platform's top bar: on photo-led videos the face is usually in the middle
+        and a bust or portrait often fills the lower half, so the top is the least likely place
+        to cover someone's face.
         """
         cap_font, line = 70, 88  # px; line height incl. leading
         cap_bottom = self.h - (self.safe_bottom + 20)          # text baseline area ends here
         cap_top = cap_bottom - 2 * line                        # two-line phrase
-        kicker_edge = cap_top - 40                             # small brand line sits just above
-        kicker_v = self.h - kicker_edge
-        lockup_v = kicker_v + 55
+        rule_y = self.safe_top + 40                            # amber rule, top of the title block
+        lockup_edge = rule_y + 28 + 72                         # bottom edge of a one-line title
+        lockup_v = self.h - lockup_edge
+        kicker_v = lockup_v - 55                               # small brand line sits below the title
         return {
             "cap_font": cap_font, "cap_margin_v": self.h - cap_bottom,
             "cap_margin_h": max(120, self.safe_right), "cap_top": cap_top, "cap_bottom": cap_bottom,
             "kicker_v": kicker_v, "lockup_v": lockup_v,
-            "rule_y": self.h - lockup_v - 122, "rule_x": (self.w - 140) // 2,
+            "rule_y": rule_y, "rule_x": (self.w - 140) // 2,
         }
 
 
 SHORT = Format("short", 1080, 1920, "portrait", True, 4, 2, 0.35, 0.5, (1080, 1920),
                safe_top=250, safe_bottom=580, safe_right=150)
-LONG = Format("long", 1920, 1080, "landscape", False, 7, 2, 0.6, 0.7, (1280, 720))
+LONG = Format("long", 1920, 1080, "landscape", True, 7, 2, 0.6, 0.7, (1280, 720))  # captions burned in AND shipped as .srt
 
 FORMATS = {f.name: f for f in (SHORT, LONG)}
 

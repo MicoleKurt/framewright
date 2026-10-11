@@ -183,7 +183,7 @@ Style: Rule,Arial,20,{accent},{accent},&H00000000,&H00000000,0,0,0,0,100,100,0,0
         rule = rf"{{\an7\pos({lay['rule_x']},{lay['rule_y']})\p1}}m 0 0 l 140 0 140 4 0 4{{\p0}}"
         pos_big = pos_small = ""
     else:
-        styles = f"""Style: Cap,Segoe UI Semibold,52,&H00F4F7FA,&H00F4F7FA,&H64000000,&H96000000,0,0,0,0,100,100,0.3,0,1,0,3,2,200,200,64,1
+        styles = f"""Style: Cap,Segoe UI Semibold,52,&H00F4F7FA,&H00F4F7FA,&H50000000,&H96000000,0,0,0,0,100,100,0.3,0,1,3,2,2,200,200,84,1
 Style: Title,{serif},64,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,1,0,0,100,100,0,0,1,0,3,1,120,120,120,1
 Style: Kicker,{serif},26,{accent},&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,10,0,1,0,2,1,120,120,0,1
 Style: Lockup,{serif},58,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,0,0,0,100,100,3,0,1,0,3,1,120,120,0,1
@@ -204,7 +204,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     lines = []
     fade = r"{\fad(500,700)}"
-    halo = r"{\blur2}" if FMT.vertical else ""  # soft dark halo behind text keeps it legible on bright photos
+    halo = r"{\blur2}"  # soft dark halo behind text keeps it legible on bright photos
 
     def lockup(start: float, end: float, big: str, small: str) -> None:
         lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Rule,,0,0,0,,{fade}{rule}")

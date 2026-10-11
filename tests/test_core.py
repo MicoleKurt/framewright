@@ -53,7 +53,7 @@ def test_formats():
     assert formats.get("nope").name == "short"
 
 
-def test_long_captions_have_chapter_cards_but_no_burned_words():
+def test_long_captions_have_chapter_cards_and_burned_words():
     render.use(formats.LONG)
     try:
         path = os.path.join(tempfile.mkdtemp(), "c.ass")
@@ -61,7 +61,7 @@ def test_long_captions_have_chapter_cards_but_no_burned_words():
         render.captions_ass(words, path, "T", chapters=[(0, "Intro"), (5, "One"), (12, "Two")])
         with open(path, encoding="utf-8") as f:
             body = f.read()
-        assert "CHAPTER 1" in body and "CHAPTER 2" in body and "Dialogue: 0," not in body
+        assert "CHAPTER 1" in body and "CHAPTER 2" in body and "Dialogue: 0," in body
     finally:
         render.use(formats.SHORT)
 
@@ -138,7 +138,8 @@ def test_shorts_text_stays_out_of_platform_ui():
         assert F.w - st[name]["mr"] <= F.w - F.safe_right, f"{name} runs into the right-hand buttons"
     cap_top = F.h - st["Cap"]["mv"] - 2 * 88
     assert F.h - st["Kicker"]["mv"] < cap_top, "title card overlaps the captions"
-    assert lay["rule_y"] > F.safe_top, "title card enters the top UI zone"
+    assert lay["rule_y"] >= F.safe_top, "title card enters the top UI zone"
+    assert F.h - st["Lockup"]["mv"] - 72 >= lay["rule_y"], "title text sits above its rule"
     assert lay["cap_font"] == st["Cap"]["size"]
 
 
