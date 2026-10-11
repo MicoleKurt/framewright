@@ -1,7 +1,7 @@
-"""MCP server: your YouTube channel + Framewright renders as tools for Claude (or any MCP client).
+"""MCP server: your YouTube channel + iframesco renders as tools for Claude (or any MCP client).
 
-    claude mcp add youtube -- python -m framewright.mcp_server       # Claude Code
-    framewright-mcp                                                   # after `pip install -e .`
+    claude mcp add youtube -- python -m iframesco.mcp_server       # Claude Code
+    iframesco-mcp                                                   # after `pip install -e .`
 
 Read tools are safe to auto-approve; write tools (update/schedule/upload/visibility) change your
 channel, so leave them on "ask" in your client's permission settings.
@@ -17,8 +17,8 @@ except ImportError:  # mcp 1.x
 from . import youtube_api as api
 from .jobs import Queue
 
-mcp = _Server("framewright-youtube")
-DB = os.getenv("FW_DB", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output", "jobs.db"))
+mcp = _Server("iframesco-youtube")
+DB = os.getenv("FS_DB", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "output", "jobs.db"))
 
 
 def _safe(fn, *a, **kw):
@@ -101,13 +101,13 @@ def add_to_playlist(video_id: str, playlist: str) -> dict:
 
 @mcp.tool()
 def upload_captions(video_id: str, srt_path: str, language: str = "en") -> dict:
-    """Attach an .srt caption track (Framewright writes one next to every render)."""
+    """Attach an .srt caption track (iframesco writes one next to every render)."""
     return _safe(api.upload_captions, video_id, srt_path, language)
 
 
 @mcp.tool()
 def upload_render(mp4_path: str, publish_at: str = "", privacy: str = "private", playlist: str = "") -> dict:
-    """Upload a Framewright render using its sidecar files (.youtube.json metadata, thumbnail, .srt).
+    """Upload a iframesco render using its sidecar files (.youtube.json metadata, thumbnail, .srt).
     With `publish_at` it is scheduled. Note: unaudited API projects keep uploads private."""
     base = mp4_path[:-4]
     meta = json.load(open(base + ".youtube.json", encoding="utf-8")) if os.path.exists(base + ".youtube.json") else {}
@@ -122,7 +122,7 @@ def upload_render(mp4_path: str, publish_at: str = "", privacy: str = "private",
 @mcp.tool()
 def create_video(topic: str, format: str = "long", minutes: int = 10, voice: str = "soothing",
                  brand: str = "", script_path: str = "") -> dict:
-    """Queue a Framewright render (needs `framewright serve` or `framewright worker` running).
+    """Queue a iframesco render (needs `iframesco serve` or `iframesco worker` running).
     format: short | long. Returns a job id; poll with job_status."""
     q = Queue(DB, runner=None, requeue=False)
     job = q.submit({"topic": topic, "format": format, "minutes": minutes, "voice": voice,

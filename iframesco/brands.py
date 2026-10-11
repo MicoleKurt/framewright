@@ -18,10 +18,10 @@ BRANDS = {
               "font_serif": "Georgia", "voice": "energetic", "format": "short"},
 }
 
-# repo-local, then the folder you run from (a private channel workspace), then FW_BRANDS
+# repo-local, then the folder you run from (a private channel workspace), then FS_BRANDS
 for _path in dict.fromkeys([
         os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "local", "brands.local.json"),
-        os.path.join(os.getcwd(), "local", "brands.local.json"), os.getenv("FW_BRANDS", "")]):
+        os.path.join(os.getcwd(), "local", "brands.local.json"), os.getenv("FS_BRANDS", "")]):
     if _path and os.path.exists(_path):
         with open(_path, encoding="utf-8") as f:
             BRANDS.update(json.load(f))

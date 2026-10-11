@@ -18,7 +18,7 @@ this space, so numbers below are treated as hypotheses to check against your own
 - **Vary pacing in the body**; slow down on visuals and emotional beats.
   [air.io](https://air.io/en/youtube-hacks/advanced-retention-editing-cutting-patterns-that-keep-viewers-past-minute-8)
 
-**How Framewright applies it** (see `framewright/prompts.py`):
+**How iframesco applies it** (see `iframesco/prompts.py`):
 cold open from the most dramatic moment → one-line promise of what the viewer will understand →
 stakes → chapters that each end on an open loop into the next ("re-hooks") → payoff that answers the
 cold open → one-line bridge to the next video. Banned: greetings, "in this video", "subscribe",
@@ -37,7 +37,7 @@ cliché words. The Shorts format keeps the channel's ending-first hook.
 ## 3. Visual relevance
 
 Search ranking alone often returns the wrong subject (a query for a person returns the concert hall
-named after them). Framewright re-ranks candidates with **CLIP** (open_clip ViT-B-32, CPU) against
+named after them). iframesco re-ranks candidates with **CLIP** (open_clip ViT-B-32, CPU) against
 each narration line + keywords, rejects near-duplicates, and only then downloads the full-size file.
 
 ## 4. Publishing via the YouTube Data API

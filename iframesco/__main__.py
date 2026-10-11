@@ -1,11 +1,11 @@
-"""Framewright CLI.
+"""iframesco CLI.
 
-  framewright make "The Apollo 13 rescue" --format long --minutes 10
-  framewright make "Alexander" --script examples/alexander.json
-  framewright serve                       # web UI + queue
-  framewright worker                      # extra render process for the same queue
-  framewright voices --sample "Some text" # render one sample per voice preset
-  framewright youtube auth|channel|videos|update|schedule|thumbnail|playlist|captions|upload|analytics
+  iframesco make "The Apollo 13 rescue" --format long --minutes 10
+  iframesco make "Alexander" --script examples/alexander.json
+  iframesco serve                       # web UI + queue
+  iframesco worker                      # extra render process for the same queue
+  iframesco voices --sample "Some text" # render one sample per voice preset
+  iframesco youtube auth|channel|videos|update|schedule|thumbnail|playlist|captions|upload|analytics
 """
 import argparse
 import json
@@ -61,7 +61,7 @@ def _upload(yt, x):
 
 
 def main(argv: list[str] | None = None) -> None:
-    p = argparse.ArgumentParser(prog="framewright", description="Open-source video generator for Shorts and long-form.")
+    p = argparse.ArgumentParser(prog="iframesco", description="Open-source video generator for Shorts and long-form.")
     sub = p.add_subparsers(dest="command", required=True)
 
     m = sub.add_parser("make", help="render a video")
@@ -70,7 +70,7 @@ def main(argv: list[str] | None = None) -> None:
     m.add_argument("--scenes", type=int, default=6, help="Shorts: number of paragraphs")
     m.add_argument("--minutes", type=int, default=10, help="long-form: target length")
     m.add_argument("--script", help="hand-written script JSON instead of the LLM")
-    m.add_argument("--voice", help="voice preset (framewright voices)")
+    m.add_argument("--voice", help="voice preset (iframesco voices)")
     m.add_argument("--brand", help="brand preset from brands.py / local/brands.local.json")
     m.add_argument("--youtube-cc", action="store_true", help="add Creative Commons YouTube clips (slower)")
     m.add_argument("--out", default="output")
@@ -78,7 +78,7 @@ def main(argv: list[str] | None = None) -> None:
 
     s = sub.add_parser("serve", help="web UI + job queue")
     s.add_argument("--port", type=int, default=int(os.getenv("PORT", 8000)))
-    s.set_defaults(fn=lambda a: __import__("framewright.server", fromlist=["serve"]).serve(a.port))
+    s.set_defaults(fn=lambda a: __import__("iframesco.server", fromlist=["serve"]).serve(a.port))
 
     w = sub.add_parser("worker", help="extra render worker for the shared queue")
     w.set_defaults(fn=lambda a: _worker())

@@ -1,4 +1,4 @@
-# Framewright: build spec
+# iframesco: build spec
 
 > The brief this version was built from. Free to run: no paid APIs, everything works on a laptop.
 
@@ -18,7 +18,7 @@ Topic (or a hand-written script) in → a publish-ready YouTube video out, in ei
 1. **Research**: full Wikipedia article (not just the intro) as the fact source.
 2. **Script** (local LLM via Ollama, default `qwen3:8b`):
    outline JSON (titles, thumbnail hook, cold open, chapters + beats) → chapter prose →
-   image queries per paragraph → metadata. Prompts live in `framewright/prompts.py`.
+   image queries per paragraph → metadata. Prompts live in `iframesco/prompts.py`.
 3. **Fact check**: every year/number in the narration must appear in the source text; failing
    sentences are dropped (LLM path) or reported (human scripts).
 4. **Voice**: Kokoro (offline) or edge-tts; soothing presets; respelling map for hard names;
@@ -34,8 +34,8 @@ Topic (or a hand-written script) in → a publish-ready YouTube video out, in ei
 
 ## Platform
 
-- **Job queue**: SQLite-backed, survives restarts, N workers (`FW_WORKERS`, default 1).
-- **Storage**: local `output/`; optional S3 mirror when `FW_S3_BUCKET` is set.
+- **Job queue**: SQLite-backed, survives restarts, N workers (`FS_WORKERS`, default 1).
+- **Storage**: local `output/`; optional S3 mirror when `FS_S3_BUCKET` is set.
 - **Brands**: per-channel accent colour, fonts, kicker/tagline, intro/outro cards.
 - **UI**: one page: create (format, length, voice, brand), queue, preview, script/chapters,
   copy-ready metadata.

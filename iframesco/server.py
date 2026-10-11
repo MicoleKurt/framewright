@@ -1,4 +1,4 @@
-"""Web UI + JSON API (stdlib only). `framewright serve` -> http://localhost:8000"""
+"""Web UI + JSON API (stdlib only). `iframesco serve` -> http://localhost:8000"""
 import json
 import mimetypes
 import os
@@ -9,7 +9,7 @@ from .formats import FORMATS
 from .jobs import Queue
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.getenv("FW_OUTPUT", os.path.join(ROOT, "output"))
+OUT = os.getenv("FS_OUTPUT", os.path.join(ROOT, "output"))
 STATIC = {"/": "web/index.html", "/index.html": "web/index.html"}
 
 
@@ -132,5 +132,5 @@ def make_handler(queue: Queue):
 def serve(port: int = 8000, host: str = "127.0.0.1") -> None:
     os.makedirs(OUT, exist_ok=True)
     queue = Queue(os.path.join(OUT, "jobs.db"), run).start(1)
-    print(f"Framewright on http://localhost:{port}", flush=True)
+    print(f"iframesco on http://localhost:{port}", flush=True)
     ThreadingHTTPServer((host, port), make_handler(queue)).serve_forever()

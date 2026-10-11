@@ -14,7 +14,7 @@ import os
 import random
 
 MOODS = ["mysterious", "tense", "somber", "calm", "uplifting", "triumphant", "epic"]
-LIB_DIR = os.getenv("FW_MUSIC_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "music"))
+LIB_DIR = os.getenv("FS_MUSIC_DIR", os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "music"))
 
 
 def library() -> list[dict]:

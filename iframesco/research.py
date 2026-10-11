@@ -14,10 +14,10 @@ import time
 import requests
 
 # Wikimedia throttles anonymous-looking clients; their policy asks for a descriptive UA.
-UA = {"User-Agent": os.getenv("WIKI_USER_AGENT", "framewright/1.0 (open-source video generator)")}
+UA = {"User-Agent": os.getenv("WIKI_USER_AGENT", "iframesco/1.0 (open-source video generator)")}
 WIKI = "https://en.wikipedia.org/w/api.php"
 COMMONS = "https://commons.wikimedia.org/w/api.php"
-CACHE = os.getenv("FW_CACHE", os.path.join(os.path.expanduser("~"), ".cache", "framewright", "media"))
+CACHE = os.getenv("FS_CACHE", os.path.join(os.path.expanduser("~"), ".cache", "iframesco", "media"))
 
 
 def _api(url: str, params: dict, retries: int = 3) -> dict:

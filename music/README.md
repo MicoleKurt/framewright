@@ -14,4 +14,4 @@ mood; the closest track is looped/trimmed under the narration and ducked when th
 A non-empty `credit` is added to the video description automatically.
 
 Free sources: YouTube Studio > Audio library, Pixabay Music, incompetech.com (credit required).
-Audio files here are gitignored. With no match, Framewright generates an ambient pad.
+Audio files here are gitignored. With no match, iframesco generates an ambient pad.

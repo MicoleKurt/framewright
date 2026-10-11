@@ -36,7 +36,7 @@ def duration(path: str) -> float:
 @functools.cache
 def encoder() -> str:
     """h264_nvenc when an NVIDIA GPU can actually encode (3-5x faster), else libx264."""
-    forced = os.getenv("FW_ENCODER")
+    forced = os.getenv("FS_ENCODER")
     if forced:
         return forced
     probe = subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i",

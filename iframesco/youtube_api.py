@@ -1,7 +1,7 @@
 """YouTube Data API v3 + Analytics client for your own channel (OAuth, free quota).
 
 One-time setup (docs/YOUTUBE_CONNECTOR.md): create an OAuth client of type *Desktop app* in Google
-Cloud, save it as ~/.framewright/client_secret.json, then `framewright youtube auth`.
+Cloud, save it as ~/.iframesco/client_secret.json, then `iframesco youtube auth`.
 
 Heads-up: uploads (`videos.insert`) from an unverified Cloud project are locked to *private* by
 YouTube until the project passes Google's audit. Metadata, thumbnails, playlists, captions and
@@ -10,8 +10,8 @@ scheduling on existing videos are not affected.
 import datetime as dt
 import os
 
-HOME = os.getenv("FW_HOME", os.path.join(os.path.expanduser("~"), ".framewright"))
-CLIENT_SECRET = os.getenv("FW_YT_CLIENT_SECRET", os.path.join(HOME, "client_secret.json"))
+HOME = os.getenv("FS_HOME", os.path.join(os.path.expanduser("~"), ".iframesco"))
+CLIENT_SECRET = os.getenv("FS_YT_CLIENT_SECRET", os.path.join(HOME, "client_secret.json"))
 TOKEN = os.path.join(HOME, "youtube_token.json")
 SCOPES = ["https://www.googleapis.com/auth/youtube.force-ssl",
           "https://www.googleapis.com/auth/youtube.upload",
@@ -34,7 +34,7 @@ def _creds(interactive: bool = False):
     if creds and creds.valid:
         return creds
     if not interactive:
-        raise NotAuthorized("YouTube not connected. Run: framewright youtube auth")
+        raise NotAuthorized("YouTube not connected. Run: iframesco youtube auth")
     if not os.path.exists(CLIENT_SECRET):
         raise NotAuthorized(f"Missing OAuth client file: {CLIENT_SECRET} (see docs/YOUTUBE_CONNECTOR.md)")
     from google_auth_oauthlib.flow import InstalledAppFlow

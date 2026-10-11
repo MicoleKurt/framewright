@@ -5,7 +5,7 @@ import sys
 import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from framewright import render  # noqa: E402
+from iframesco import render  # noqa: E402
 
 
 def _secs(ts: str) -> float:

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Framewright" width="260">
+  <img src="assets/logo.svg" alt="iframesco" width="260">
 </p>
 
 <p align="center"><b>Open-source video generator for Shorts and long-form.</b><br>
@@ -15,7 +15,7 @@ Free and local: no API bills, no watermark, your machine.</p>
 
 ---
 
-<p align="center"><img src="docs/img/ui.png" alt="Framewright UI" width="860"></p>
+<p align="center"><img src="docs/img/ui.png" alt="iframesco UI" width="860"></p>
 
 ## What it makes
 
@@ -59,19 +59,19 @@ repeating each other), three title options, and chapters YouTube recognises.
 ## Quick start
 
 ```bash
-git clone https://github.com/MicoleKurt/framewright && cd framewright
+git clone https://github.com/MicoleKurt/iframesco && cd iframesco
 pip install -e ".[all]"          # or: pip install -r requirements.txt
 ollama pull qwen3:8b             # https://ollama.com (any model works; see FALLBACKS)
-framewright serve                # http://localhost:8000
+iframesco serve                # http://localhost:8000
 ```
 
 Needs Python 3.10+ and [ffmpeg](https://ffmpeg.org) on PATH.
 
 ```bash
-framewright make "How the Apollo 13 crew made it home" --format long --minutes 10
-framewright make "The history of coffee" --format short --voice storyteller
-framewright make "Apollo 13" --script examples/apollo-13-long.json --brand noir
-framewright voices                       # one sample per voice preset into samples/
+iframesco make "How the Apollo 13 crew made it home" --format long --minutes 10
+iframesco make "The history of coffee" --format short --voice storyteller
+iframesco make "Apollo 13" --script examples/apollo-13-long.json --brand noir
+iframesco voices                       # one sample per voice preset into samples/
 ```
 
 Optional free keys for real stock video: `PEXELS_API_KEY`, `PIXABAY_API_KEY`.
@@ -79,8 +79,8 @@ Optional free keys for real stock video: `PEXELS_API_KEY`, `PIXABAY_API_KEY`.
 ## Publish from Claude (MCP)
 
 ```bash
-framewright youtube auth                                  # one-time Google consent
-claude mcp add youtube -- python -m framewright.mcp_server
+iframesco youtube auth                                  # one-time Google consent
+claude mcp add youtube -- python -m iframesco.mcp_server
 ```
 
 Then ask: *"Make a 10-minute video on the Apollo 13 rescue, upload it, add it to my History playlist
@@ -107,12 +107,12 @@ flowchart LR
 |---|---|---|
 | `OLLAMA_MODEL` | `qwen3:8b` | writer model |
 | `OLLAMA_NUM_GPU` | `0` (CPU) | `-1` lets Ollama use the GPU (needs a recent NVIDIA driver) |
-| `FW_VOICE` | `soothing` | default voice preset |
-| `FW_CLIP` | `1` | `0` disables CLIP ranking |
-| `FW_ENCODER` | auto | force `libx264` / `h264_nvenc` |
+| `FS_VOICE` | `soothing` | default voice preset |
+| `FS_CLIP` | `1` | `0` disables CLIP ranking |
+| `FS_ENCODER` | auto | force `libx264` / `h264_nvenc` |
 | `PEXELS_API_KEY`, `PIXABAY_API_KEY` | – | stock video |
-| `FW_S3_BUCKET`, `FW_S3_ENDPOINT` | – | mirror outputs to S3 / R2 / MinIO |
-| `FW_MUSIC_DIR` | `music/` | mood library ([music/README.md](music/README.md)) |
+| `FS_S3_BUCKET`, `FS_S3_ENDPOINT` | – | mirror outputs to S3 / R2 / MinIO |
+| `FS_MUSIC_DIR` | `music/` | mood library ([music/README.md](music/README.md)) |
 
 ## Script format
 
@@ -135,7 +135,7 @@ Write your own script and keep everything else automated:
 
 ## Licensing of what you publish
 
-Framewright's code is MIT. Media keeps its own licence: Commons files are credited automatically in
+iframesco's code is MIT. Media keeps its own licence: Commons files are credited automatically in
 the description and `.credits.txt`; Pexels/Pixabay don't require credit; YouTube clips are
 restricted to Creative Commons (CC BY) and credited. Kokoro is Apache-2.0. Check your music's licence.
 

@@ -2,7 +2,7 @@
 
 No Redis/Postgres needed for a single machine. A job that was running when the server died is
 re-queued on startup. Scale out by starting more worker *processes* against the same database
-(`python -m framewright worker`): claims are atomic, and each process renders one job at a time
+(`python -m iframesco worker`): claims are atomic, and each process renders one job at a time
 (the renderer keeps per-process format state, so threads would collide).
 """
 import json

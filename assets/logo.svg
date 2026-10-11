@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 48" width="232" height="48" role="img" aria-label="Framewright">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 186 48" width="186" height="48" role="img" aria-label="iframesco">
   <path d="M1.5 14V1.5H14M42.5 34v12.5H30" fill="none" stroke="#6f6f6f" stroke-width="1.6"/>
   <path d="M13 11h17v4.6H17.8v4.2h9.4v4.6h-9.4V37H13z" fill="#ededed"/>
-  <text x="58" y="32" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="24" letter-spacing="-.5"><tspan font-weight="600" fill="#ededed">frame</tspan><tspan font-weight="400" fill="#8f8f8f">wright</tspan></text>
+  <text x="58" y="32" font-family="Inter, 'Segoe UI', system-ui, sans-serif" font-size="24" letter-spacing="-.5"><tspan font-weight="600" fill="#ededed">iframes</tspan><tspan font-weight="400" fill="#8f8f8f">co</tspan></text>
 </svg>

@@ -5,9 +5,9 @@ import tempfile
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from framewright import factcheck, formats, render, voice  # noqa: E402
-from framewright.jobs import Queue  # noqa: E402
-from framewright.pipeline import chapter_list, clock  # noqa: E402
+from iframesco import factcheck, formats, render, voice  # noqa: E402
+from iframesco.jobs import Queue  # noqa: E402
+from iframesco.pipeline import chapter_list, clock  # noqa: E402
 
 
 def test_xfade_offsets_keep_total_length():
@@ -102,7 +102,7 @@ def test_join_crossfades_keep_timeline_length():
 
 
 def test_script_cleanup_drops_headings_labels_repeats_and_filler():
-    from framewright.script import _clean, _paragraphs
+    from iframesco.script import _clean, _paragraphs
     raw = ("Oxygen Tank Exploded\nOn April 13, 1970, an explosion ripped through the service module, venting oxygen.\n\n"
            "The promise: you will learn how three men got home in a crippled spacecraft.\n\n"
            "The crew prepared for the long journey home. Mission Control worked through the night on it.")

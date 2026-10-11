@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "framewright"
+name = "iframesco"
 version = "1.0.0"
 description = "Open-source video generator for Shorts and long-form. Free and local."
 readme = "README.md"
@@ -17,11 +17,11 @@ voice = ["kokoro>=0.9.4", "soundfile>=0.12"]
 clip = ["open_clip_torch>=2.24"]
 youtube = ["google-api-python-client>=2.100", "google-auth-oauthlib>=1.2", "mcp>=1.10"]
 s3 = ["boto3>=1.34"]
-all = ["framewright[voice,clip,youtube]"]
+all = ["iframesco[voice,clip,youtube]"]
 
 [project.scripts]
-framewright = "framewright.__main__:main"
-framewright-mcp = "framewright.mcp_server:main"
+iframesco = "iframesco.__main__:main"
+iframesco-mcp = "iframesco.mcp_server:main"
 
 [tool.setuptools]
-packages = ["framewright"]
+packages = ["iframesco"]

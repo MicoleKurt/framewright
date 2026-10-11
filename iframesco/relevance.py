@@ -12,13 +12,13 @@ from functools import lru_cache
 
 from . import research
 
-MODEL = os.getenv("FW_CLIP_MODEL", "ViT-B-32")
-PRETRAINED = os.getenv("FW_CLIP_WEIGHTS", "laion2b_s34b_b79k")
+MODEL = os.getenv("FS_CLIP_MODEL", "ViT-B-32")
+PRETRAINED = os.getenv("FS_CLIP_WEIGHTS", "laion2b_s34b_b79k")
 DUP = 0.94  # cosine similarity above which two shots count as the same picture
 
 
 def available() -> bool:
-    if os.getenv("FW_CLIP", "1") == "0":
+    if os.getenv("FS_CLIP", "1") == "0":
         return False
     from importlib.util import find_spec  # cheap: don't import torch just to check
     return find_spec("open_clip") is not None and find_spec("torch") is not None

@@ -19,7 +19,7 @@ PRESETS = {
     "british":     ("edge", "en-GB-RyanNeural", -5, "-1Hz"),
     "energetic":   ("edge", "en-US-AndrewMultilingualNeural", 6, ""),
 }
-DEFAULT = os.getenv("FW_VOICE", "soothing")
+DEFAULT = os.getenv("FS_VOICE", "soothing")
 
 
 def kokoro_available() -> bool:
