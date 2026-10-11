@@ -6,55 +6,53 @@
 <title>Framewright Studio</title>
 <link rel="icon" href="/assets/logo-mark.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0b0a0d; --bg2: #121016; --panel: #17141c; --panel2: #1e1a24; --line: #2a2531; --line2: #3a3343;
-    --text: #f3eee7; --muted: #a39cab; --faint: #6d6675;
-    --a1: #ffc15e; --a2: #ff6b4a; --a3: #c2367a; --ok: #59d69b; --err: #ff7b72;
-    --grad: linear-gradient(135deg, var(--a1), var(--a2) 55%, var(--a3));
-    --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+    --bg: #0c0c0c; --bg2: #111111; --panel: #141414; --panel2: #1a1a1a; --line: #222222; --line2: #2e2e2e;
+    --text: #ededed; --muted: #8f8f8f; --faint: #5c5c5c;
+    --a1: #e8e8e8; --a2: #d8d2c4; --a3: #d8d2c4; --ok: #9fbf9f; --err: #d98a80;
+    --grad: none;
+    --display: "Inter", system-ui, sans-serif;
     --sans: "Inter", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
-    --r: 14px;
+    --r: 10px;
   }
   * { box-sizing: border-box; margin: 0; }
   html, body { background: var(--bg); }
-  body { color: var(--text); font: 14.5px/1.55 var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased;
-         background: radial-gradient(1200px 500px at 85% -10%, rgba(255,107,74,.10), transparent 60%),
-                     radial-gradient(900px 400px at -10% 10%, rgba(194,54,122,.08), transparent 60%), var(--bg); }
+  body { color: var(--text); font: 14px/1.6 var(--sans); min-height: 100vh; -webkit-font-smoothing: antialiased; background: var(--bg); }
   button, input, select, textarea { font: inherit; color: inherit; }
   .wrap { max-width: 1320px; margin: 0 auto; padding: 18px 28px 64px; }
 
   /* header */
   header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 6px 0 22px; }
   .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
-  .logo img { width: 34px; height: 34px; }
-  .logo b { font: 700 21px var(--display); letter-spacing: -.02em; }
-  .logo b span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .logo img { width: 22px; height: 22px; filter: grayscale(1) brightness(1.6); }
+  .logo b { font: 600 16px var(--display); letter-spacing: -.01em; }
+  .logo b span { color: var(--muted); font-weight: 500; }
   .status { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
   .pill { font: 500 11.5px var(--mono); color: var(--muted); border: 1px solid var(--line); border-radius: 999px;
           padding: 4px 10px; display: inline-flex; align-items: center; gap: 6px; background: var(--bg2); }
   .pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
-  .pill.on i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  .pill.on i { background: var(--ok); }
 
   .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 520px); gap: 28px; align-items: start; }
 
   /* hero + create */
-  .hero h1 { font: 700 clamp(32px, 4vw, 50px)/1.02 var(--display); letter-spacing: -.035em; }
-  .hero h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .hero p { color: var(--muted); max-width: 58ch; margin-top: 10px; font-size: 15px; }
-  .card { background: linear-gradient(180deg, var(--panel), var(--bg2)); border: 1px solid var(--line);
+  .hero h1 { font: 500 clamp(26px, 3vw, 34px)/1.15 var(--display); letter-spacing: -.025em; }
+  .hero h1 em { font-style: normal; color: var(--muted); }
+  .hero p { color: var(--muted); max-width: 52ch; margin-top: 8px; font-size: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line);
           border-radius: var(--r); padding: 18px; }
   .create { margin-top: 22px; }
   .topic { display: flex; gap: 10px; align-items: center; background: var(--bg); border: 1px solid var(--line2);
            border-radius: 12px; padding: 6px 6px 6px 16px; transition: border-color .2s, box-shadow .2s; }
-  .topic:focus-within { border-color: var(--a2); box-shadow: 0 0 0 4px rgba(255,107,74,.12); }
+  .topic:focus-within { border-color: var(--line2); }
   .topic input { flex: 1; min-width: 0; background: none; border: 0; outline: 0; font: 500 19px var(--display); padding: 10px 0; }
   .topic input::placeholder { color: var(--faint); font-weight: 400; }
-  .go { border: 0; border-radius: 10px; padding: 12px 20px; font-weight: 600; cursor: pointer; color: #1a0f0a;
-        background: var(--grad); white-space: nowrap; transition: transform .15s, filter .2s; }
-  .go:hover { filter: brightness(1.08); } .go:active { transform: scale(.98); }
-  .go:disabled { filter: grayscale(.8) brightness(.7); cursor: default; }
+  .go { border: 0; border-radius: 10px; padding: 12px 20px; font-weight: 600; cursor: pointer; color: var(--bg);
+        background: var(--text); white-space: nowrap; transition: opacity .2s; }
+  .go:hover { opacity: .85; }
+  .go:disabled { opacity: .4; cursor: default; }
 
   .controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 14px; }
   .ctl label { display: block; font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin-bottom: 6px; }
@@ -65,7 +63,7 @@
   select:focus, .num:focus { border-color: var(--line2); }
   .row2 { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; margin-top: 14px; }
   .check { display: flex; gap: 8px; align-items: center; color: var(--muted); cursor: pointer; font-size: 13px; }
-  .check input { accent-color: var(--a2); }
+  .check input { accent-color: var(--text); }
   .chips { display: flex; flex-wrap: wrap; gap: 6px; }
   .chip { border: 1px solid var(--line); background: none; border-radius: 999px; padding: 5px 11px; color: var(--muted); cursor: pointer; font-size: 12.5px; }
   .chip:hover { color: var(--text); border-color: var(--line2); }
@@ -83,11 +81,11 @@
   .job .t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .job .m { font: 12px var(--mono); color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .bar { height: 3px; background: var(--line); border-radius: 3px; margin-top: 6px; overflow: hidden; }
-  .bar i { display: block; height: 100%; width: 0; background: var(--grad); transition: width .6s ease; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--text); transition: width .6s ease; }
   .tag { font: 500 11px var(--mono); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
   .tag.done { color: var(--ok); border-color: rgba(89,214,155,.35); }
   .tag.error { color: var(--err); border-color: rgba(255,123,114,.35); }
-  .tag.running { color: var(--a1); border-color: rgba(255,193,94,.35); }
+  .tag.running { color: var(--text); border-color: var(--line2); }
   .empty { color: var(--faint); font-size: 13px; padding: 14px; border: 1px dashed var(--line); border-radius: 12px; text-align: center; }
 
   /* preview */
@@ -98,23 +96,22 @@
   .stage video { width: 100%; height: 100%; object-fit: contain; display: none; background: #000; }
   .stage.ready video { display: block; }
   .ph { text-align: center; color: var(--faint); padding: 24px; }
-  .ph img { width: 46px; opacity: .55; margin-bottom: 10px; }
-  .ph p { font: 500 15px var(--display); }
+  .ph img { width: 28px; opacity: .3; margin-bottom: 10px; filter: grayscale(1); }
+  .ph p { font: 400 13px var(--sans); }
   .stage.ready .ph { display: none; }
   .steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 12px; }
   .steps div { font: 500 10.5px var(--mono); color: var(--faint); text-align: center; padding-top: 8px; border-top: 2px solid var(--line); letter-spacing: .04em; }
   .steps div.done { color: var(--muted); border-color: var(--line2); }
-  .steps div.active { color: var(--text); border-image: var(--grad) 1; }
+  .steps div.active { color: var(--text); border-color: var(--text); }
   .msg { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; font-size: 13px; color: var(--muted); min-height: 20px; }
   .msg .err { color: var(--err); }
   .tabs { display: flex; gap: 4px; margin-top: 16px; border-bottom: 1px solid var(--line); }
   .tabs button { border: 0; background: none; padding: 9px 12px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; font-weight: 500; }
-  .tabs button.on { color: var(--text); border-color: var(--a2); }
+  .tabs button.on { color: var(--text); border-color: var(--text); }
   .pane { display: none; padding-top: 14px; } .pane.on { display: block; }
   .script li { list-style: none; padding: 10px 0; border-bottom: 1px solid var(--line); color: var(--text); }
   .script ol { padding: 0; }
-  .script h4 { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; margin: 14px 0 2px;
-               background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .script h4 { font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; margin: 16px 0 2px; color: var(--muted); }
   .field { margin-bottom: 12px; }
   .field .h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
   .field .h b { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
@@ -125,7 +122,7 @@
   .thumbs img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; margin-bottom: 10px; }
   .dl { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
   .dl a { text-decoration: none; color: var(--text); border: 1px solid var(--line2); border-radius: 9px; padding: 7px 12px; font-size: 13px; }
-  .dl a:hover { border-color: var(--a2); }
+  .dl a:hover { border-color: var(--muted); }
   footer { margin-top: 40px; color: var(--faint); font-size: 12.5px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
 
   @media (max-width: 1080px) { .grid { grid-template-columns: 1fr; } aside { position: static; } }
@@ -142,16 +139,15 @@
 <body>
 <div class="wrap">
   <header>
-    <a class="logo" href="/"><img src="/assets/logo-mark.svg" alt=""><b>frame<span>wright</span></b></a>
+    <a class="logo" href="/"><b>frame<span>wright</span></b></a>
     <div class="status" id="status"></div>
   </header>
 
   <div class="grid">
     <section>
       <div class="hero">
-        <h1>Topic in. <em>Publish-ready</em> video out.</h1>
-        <p>Shorts or long-form documentaries, written by a local model from real sources, narrated in a calm
-          offline voice, cut from relevance-ranked footage, packaged with chapters, captions and a thumbnail. Free, on your machine.</p>
+        <h1>Make a video. <em>Short or long-form.</em></h1>
+        <p>Enter a topic. Framewright researches it, writes and narrates the script, cuts the footage and packages it for YouTube.</p>
       </div>
 
       <form class="card create" id="form">
@@ -176,12 +172,12 @@
       </form>
 
       <div class="sec"><h2>Queue</h2><span id="qcount"></span></div>
-      <div class="queue" id="queue"><div class="empty">Renders you start appear here and survive restarts.</div></div>
+      <div class="queue" id="queue"><div class="empty">No renders yet.</div></div>
     </section>
 
     <aside>
       <div class="stage" id="stage">
-        <div class="ph"><img src="/assets/logo-mark.svg" alt=""><p>Your video renders here</p></div>
+        <div class="ph"><img src="/assets/logo-mark.svg" alt=""><p>No render selected</p></div>
         <video id="video" controls playsinline></video>
       </div>
       <div class="steps" id="steps"></div>
@@ -196,7 +192,7 @@
     </aside>
   </div>
 
-  <footer><span>Framewright · open source · runs locally</span><span>Ollama · Kokoro / Edge TTS · CLIP · ffmpeg</span></footer>
+  <footer><span>Framewright</span><span>Runs locally</span></footer>
 </div>
 
 <script>

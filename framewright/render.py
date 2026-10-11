@@ -92,16 +92,18 @@ def xfade_offsets(durs: list[float]) -> list[float]:
 
 def _xfade_group(work: str, clips: list[str], durs: list[float], o: float, out: str) -> None:
     inputs = [a for c in clips for a in ("-i", c)]
-    chain, prev = [], "0:v"
+    # normalise timebase/fps/pixel format: stock footage and stills must match for xfade
+    chain = [f"[{i}:v]settb=AVTB,fps={FPS},format=yuv420p,setsar=1[n{i}]" for i in range(len(clips))]
+    prev = "n0"
     for k, off in enumerate(xfade_offsets(durs), start=1):
         tag = f"x{k}"
-        chain.append(f"[{prev}][{k}:v]xfade=transition=fade:duration={o:.3f}:offset={off:.3f}[{tag}]")
+        chain.append(f"[{prev}][n{k}]xfade=transition=fade:duration={o:.3f}:offset={off:.3f}[{tag}]")
         prev = tag
     ff(*inputs, "-filter_complex", ";".join(chain), "-map", f"[{prev}]", *enc(), out, cwd=work)
 
 
 def join(work: str, clips: list[str], durs: list[float], out: str, overlap: float = 0.0,
-         group: int = 12) -> None:
+         group: int = 12, level: int = 0) -> None:
     """Concatenate shots. With `overlap`, consecutive shots crossfade; each clip except the last
     must be rendered `overlap` seconds longer than its slot in `durs`. Long timelines are joined
     in groups so the filter graph stays small, then the groups are crossfaded the same way."""
@@ -115,7 +117,7 @@ def join(work: str, clips: list[str], durs: list[float], out: str, overlap: floa
         return
     parts, part_durs = [], []
     for g in range(0, len(clips), group):
-        name = f"grp{g // group}.mp4"
+        name = f"grp{level}_{g // group}.mp4"
         sub_c, sub_d = clips[g:g + group], durs[g:g + group]
         if len(sub_c) == 1:
             os.replace(os.path.join(work, sub_c[0]), os.path.join(work, name))
@@ -123,7 +125,7 @@ def join(work: str, clips: list[str], durs: list[float], out: str, overlap: floa
             _xfade_group(work, sub_c, sub_d, overlap, name)
         parts.append(name)
         part_durs.append(sum(sub_d))
-    join(work, parts, part_durs, out, overlap, group)
+    join(work, parts, part_durs, out, overlap, group, level + 1)
 
 
 # ---------------------------------------------------------------- music + mix

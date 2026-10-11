@@ -58,17 +58,40 @@ def ask(prompt: str, json_mode: bool = False, temperature: float = 0.6, ctx: int
     return re.sub(r"<think>.*?</think>", "", body["response"], flags=re.S).strip()
 
 
+LABEL = re.compile(r"^\s*(the\s+)?(promise|stakes|payoff|hook|cold open|chapter\s*\d*|paragraph\s*\d*)\s*[:.\-]\s*", re.I)
+
+
 def _paragraphs(text: str, min_words: int = 8) -> list[str]:
-    paras = [re.sub(r"\s+", " ", p).strip() for p in re.split(r"\n\s*\n", text)]
-    paras = [re.sub(r"^(\d+[.)]|[-*#]+)\s*", "", p) for p in paras]  # stray numbering/bullets/headings
-    return [p for p in paras if len(p.split()) >= min_words and not p.lower().startswith("chapter")]
+    paras = []
+    for block in re.split(r"\n\s*\n", text):
+        lines = [ln.strip() for ln in block.splitlines() if ln.strip()]
+        # a short line without end punctuation is a heading the model added ("Oxygen Tank Exploded")
+        lines = [ln for ln in lines if not (len(ln.split()) <= 8 and not re.search(r"[.!?\"')]$", ln))]
+        p = re.sub(r"\s+", " ", " ".join(lines)).strip()
+        p = LABEL.sub("", re.sub(r"^(\d+[.)]|[-*#]+)\s*", "", p))  # numbering, bullets, "Promise:" labels
+        if len(p.split()) >= min_words:
+            paras.append(p)
+    return paras
 
 
-def _clean(paras: list[str], source: str, report: list) -> list[str]:
+def _norm(sentence: str) -> str:
+    return re.sub(r"[^a-z0-9 ]", "", sentence.lower()).strip()
+
+
+def _clean(paras: list[str], source: str, report: list, seen: set | None = None) -> list[str]:
+    """Drop sentences that use banned filler, repeat earlier narration (8B models love to copy the
+    'previous paragraph' they were given), or contain numbers the source doesn't."""
+    seen = set() if seen is None else seen
     out = []
     for p in paras:
-        p = BANNED.sub("", p).replace("  ", " ")
-        p, dropped = factcheck.clean(p, source)
+        keep = []
+        for sent in re.split(r"(?<=[.!?])\s+", p.strip()):
+            key = _norm(sent)
+            if not key or key in seen or BANNED.search(sent):
+                continue
+            seen.add(key)
+            keep.append(sent)
+        p, dropped = factcheck.clean(" ".join(keep), source)
         report.extend(dropped)
         if len(p.split()) >= 8:
             out.append(p)
@@ -158,6 +181,7 @@ def write_long(topic: str, facts: dict, minutes: int = 10, progress=lambda m: No
     n_ch = max(4, min(8, round(minutes / 1.6)))
     words_total = minutes * WPM
     report: list[str] = []
+    seen: set[str] = set()
     src = facts["text"]
     progress("Planning chapters")
     plan = outline(topic, facts, minutes, n_ch)
@@ -170,7 +194,7 @@ def write_long(topic: str, facts: dict, minutes: int = 10, progress=lambda m: No
                                         cold_open=plan["cold_open"], promise=plan.get("promise", ""),
                                         stakes=plan.get("stakes", ""), style=prompts.STYLE),
                ctx=12288, temperature=0.65)
-    opening = _clean(_paragraphs(cold), src, report)
+    opening = _clean(_paragraphs(cold), src, report, seen)
     scenes += [{"narration": p} for p in opening]
 
     per_ch = (words_total - sum(len(p.split()) for p in opening)) // len(chapters)
@@ -185,7 +209,7 @@ def write_long(topic: str, facts: dict, minutes: int = 10, progress=lambda m: No
             facts=_relevant(src, ch["title"] + " " + beats), previous=scenes[-1]["narration"] if scenes else "",
             words=per_ch, paras=max(2, round(per_ch / 55)), ending=ending, style=prompts.STYLE),
             ctx=12288, temperature=0.65, max_tokens=1600)
-        paras = _clean(_paragraphs(text), src, report)
+        paras = _clean(_paragraphs(text), src, report, seen)
         for i, p in enumerate(paras):
             scenes.append({"narration": p, **({"chapter": ch["title"]} if i == 0 else {})})
 

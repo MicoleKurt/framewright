@@ -12,13 +12,15 @@ source text and bans the usual filler.
 
 BANNED_WORDS = ["fascinating", "journey", "delve", "tapestry", "testament", "in a world", "buckle up",
                 "little did", "game-changer", "unleash", "dive in", "let's dive", "welcome back",
-                "in this video", "subscribe", "smash that"]
+                "in this video", "subscribe", "smash that", "human spirit", "resilience", "stood the test of time",
+                "forever changed", "rich history", "it's important to note"]
 
 STYLE = """Style rules:
 - Spoken documentary narration: calm, concrete, vivid. Short sentences mixed with longer ones.
 - Every claim must come from SOURCE. Never invent dates, numbers, quotes or names.
 - Concrete details beat adjectives: a place, a year, a person, an object.
 - No greetings, no "in this video", no calls to subscribe, no questions to the viewer, no exclamation marks.
+- Plain narration only: no headings, no labels like "Promise:" or "Chapter 1", no lists.
 - Never use these words: """ + ", ".join(BANNED_WORDS) + "."
 
 # ---------------------------------------------------------------- Shorts
@@ -48,7 +50,8 @@ SOURCE (the only facts you may use):
 {facts}
 
 Plan the video for maximum audience retention:
-- "cold_open": the single most dramatic or surprising TRUE moment in the source. The video starts here.
+- "cold_open": one full sentence describing the single most dramatic or surprising TRUE moment in the
+  source (who, where, what happened). The video starts here, in the middle of the action.
 - "promise": one sentence saying what the viewer will understand by the end. Specific, not vague.
 - "stakes": one sentence on what was at risk or why it mattered.
 - "chapters": {chapters} chapters in story order. Each has a 2-5 word "title", 3-5 "beats" and an
@@ -71,10 +74,11 @@ COLD_OPEN = """Write the opening {words} words of a documentary about {topic}.
 SOURCE:
 {facts}
 
-Structure (3 paragraphs, separated by blank lines):
-1. Drop the viewer straight into this moment, as if it is happening now: {cold_open}
-2. The promise: {promise}
-3. The stakes: {stakes} End with a line that sends us back to the beginning of the story.
+Write 3 paragraphs separated by blank lines, with no headings or labels:
+- First paragraph: put the viewer inside this moment, as if it is happening now: {cold_open}
+- Second paragraph: in your own words, tell the viewer what they will understand by the end. Based on: {promise}
+- Third paragraph: why it mattered and what was at risk. Based on: {stakes}
+  End it with one line that takes us back to where the story really began.
 {style}"""
 
 CHAPTER = """You are writing chapter {k} of {n} of a documentary about {topic}.

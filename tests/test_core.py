@@ -83,3 +83,34 @@ def test_queue_runs_jobs():
             break
         time.sleep(0.1)
     assert q.get(jid)["result"] == {"echo": "hello"}
+
+
+def test_join_crossfades_keep_timeline_length():
+    import shutil
+    if not shutil.which("ffmpeg"):
+        return
+    work = tempfile.mkdtemp()
+    slots, o = [1.0, 1.5, 0.8, 1.2, 0.9], 0.3
+    clips = []
+    for i, d in enumerate(slots):
+        length = d + (o if i < len(slots) - 1 else 0)
+        render.ff("-f", "lavfi", "-i", f"color=c=0x{i*40:02x}2040:s=320x240:d={length:.3f}:r=30",
+                  "-c:v", "libx264", "-pix_fmt", "yuv420p", f"c{i}.mp4", cwd=work)
+        clips.append(f"c{i}.mp4")
+    render.join(work, clips, slots, "out.mp4", overlap=o, group=2)  # forces the grouped path
+    assert abs(render.duration(os.path.join(work, "out.mp4")) - sum(slots)) < 0.12
+
+
+def test_script_cleanup_drops_headings_labels_repeats_and_filler():
+    from framewright.script import _clean, _paragraphs
+    raw = ("Oxygen Tank Exploded\nOn April 13, 1970, an explosion ripped through the service module, venting oxygen.\n\n"
+           "The promise: you will learn how three men got home in a crippled spacecraft.\n\n"
+           "The crew prepared for the long journey home. Mission Control worked through the night on it.")
+    paras = _paragraphs(raw)
+    assert paras[0].startswith("On April 13") and paras[1].startswith("you will learn")
+    seen = set()
+    first = _clean(paras, "April 13, 1970", [], seen)
+    assert "journey" not in " ".join(first)
+    again = _clean(["On April 13, 1970, an explosion ripped through the service module, venting oxygen. "
+                    "Engineers built an adapter from plastic and tape that night."], "April 13, 1970", [], seen)
+    assert again == ["Engineers built an adapter from plastic and tape that night."]

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="Framewright" width="360">
+  <img src="assets/logo.svg" alt="Framewright" width="260">
 </p>
 
 <p align="center"><b>Topic in. Publish-ready YouTube video out.</b><br>
@@ -9,8 +9,8 @@ Free and local: no API bills, no watermark, your machine.</p>
 <p align="center">
   <img alt="Python" src="https://img.shields.io/badge/python-3.10%2B-1f1a24?style=flat-square">
   <img alt="License" src="https://img.shields.io/badge/license-MIT-1f1a24?style=flat-square">
-  <img alt="Cost" src="https://img.shields.io/badge/cost-%240%20per%20video-ff6b4a?style=flat-square">
-  <img alt="Formats" src="https://img.shields.io/badge/formats-Shorts%20%C2%B7%20long--form-ffc15e?style=flat-square">
+  <img alt="Cost" src="https://img.shields.io/badge/cost-%240%20per%20video-1f1a24?style=flat-square">
+  <img alt="Formats" src="https://img.shields.io/badge/formats-Shorts%20%C2%B7%20long--form-1f1a24?style=flat-square">
 </p>
 
 ---
