@@ -72,6 +72,7 @@ iframesco make "How the Apollo 13 crew made it home" --format long --minutes 10
 iframesco make "The history of coffee" --format short --voice storyteller
 iframesco make "Apollo 13" --script examples/apollo-13-long.json --brand noir
 iframesco voices                       # one sample per voice preset into samples/
+iframesco safezone photo.jpg            # check caption/title placement against the Shorts UI
 ```
 
 Optional free keys for real stock video: `PEXELS_API_KEY`, `PIXABAY_API_KEY`.
