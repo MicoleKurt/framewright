@@ -5,6 +5,7 @@
   iframesco serve                       # web UI + queue
   iframesco worker                      # extra render process for the same queue
   iframesco voices --sample "Some text" # render one sample per voice preset
+  iframesco safezone photo.jpg           # preview text placement against the Shorts UI
   iframesco youtube auth|channel|videos|update|schedule|thumbnail|playlist|captions|upload|analytics
 """
 import argparse
@@ -72,7 +73,8 @@ def main(argv: list[str] | None = None) -> None:
     m.add_argument("--script", help="hand-written script JSON instead of the LLM")
     m.add_argument("--voice", help="voice preset (iframesco voices)")
     m.add_argument("--brand", help="brand preset from brands.py / local/brands.local.json")
-    m.add_argument("--youtube-cc", action="store_true", help="add Creative Commons YouTube clips (slower)")
+    m.add_argument("--youtube-cc", "--youtube", dest="youtube_cc", action="store_true",
+                   help="add Creative Commons YouTube clips (slower)")
     m.add_argument("--out", default="output")
     m.set_defaults(fn=_make)
 
@@ -87,6 +89,11 @@ def main(argv: list[str] | None = None) -> None:
     v.add_argument("--sample", default="Everyone knows how the story ends. Almost nobody knows how it started.")
     v.add_argument("--out", default="samples")
     v.set_defaults(fn=_voices)
+
+    z = sub.add_parser("safezone", help="check caption/title placement on a photo against the Shorts UI")
+    z.add_argument("image")
+    z.add_argument("--out", default="safezone.jpg")
+    z.set_defaults(fn=lambda a: print(__import__("iframesco.safezone", fromlist=["preview"]).preview(a.image, a.out)))
 
     y = sub.add_parser("youtube", help="manage your channel via the YouTube Data API")
     y.add_argument("cmd")

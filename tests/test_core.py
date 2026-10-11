@@ -140,3 +140,21 @@ def test_shorts_text_stays_out_of_platform_ui():
     assert F.h - st["Kicker"]["mv"] < cap_top, "title card overlaps the captions"
     assert lay["rule_y"] > F.safe_top, "title card enters the top UI zone"
     assert lay["cap_font"] == st["Cap"]["size"]
+
+
+def test_safe_zone_is_overridable_and_preview_renders(monkeypatch, tmp_path):
+    import shutil
+    monkeypatch.setenv("FS_SAFE_BOTTOM", "480")
+    assert formats.get("short").safe_bottom == 480 and formats.get("short").layout()["cap_margin_v"] == 500
+    assert formats.get("long").safe_bottom == 0  # landscape is untouched
+    monkeypatch.delenv("FS_SAFE_BOTTOM")
+    assert formats.get("short").safe_bottom == 580
+    if not shutil.which("ffmpeg"):
+        return
+    from PIL import Image
+    from iframesco import safezone
+    Image.new("RGB", (800, 1200), (90, 100, 110)).save(tmp_path / "p.jpg")
+    out = safezone.preview(str(tmp_path / "p.jpg"), str(tmp_path / "o.jpg"))
+    with Image.open(out) as im:
+        assert im.size == (1080, 1920)
+    render.use(formats.SHORT)

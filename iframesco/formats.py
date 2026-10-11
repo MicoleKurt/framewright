@@ -1,4 +1,6 @@
 """Output formats. A Short and a long-form video differ in canvas, pacing, captions and packaging."""
+import dataclasses
+import os
 from dataclasses import dataclass
 
 
@@ -51,5 +53,12 @@ LONG = Format("long", 1920, 1080, "landscape", False, 7, 2, 0.6, 0.7, (1280, 720
 FORMATS = {f.name: f for f in (SHORT, LONG)}
 
 
+SAFE_ENV = {"safe_top": "FS_SAFE_TOP", "safe_bottom": "FS_SAFE_BOTTOM", "safe_right": "FS_SAFE_RIGHT"}
+
+
 def get(name: str | None) -> Format:
-    return FORMATS.get((name or "short").lower(), SHORT)
+    """The format, with the platform safe zone optionally overridden (px) via FS_SAFE_TOP /
+    FS_SAFE_BOTTOM / FS_SAFE_RIGHT, e.g. FS_SAFE_BOTTOM=480 for a tighter reserve."""
+    fmt = FORMATS.get((name or "short").lower(), SHORT)
+    over = {k: int(os.environ[v]) for k, v in SAFE_ENV.items() if os.environ.get(v, "").isdigit()}
+    return dataclasses.replace(fmt, **over) if over and fmt.vertical else fmt

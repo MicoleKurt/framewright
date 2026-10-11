@@ -113,6 +113,7 @@ flowchart LR
 | `PEXELS_API_KEY`, `PIXABAY_API_KEY` | – | stock video |
 | `FS_S3_BUCKET`, `FS_S3_ENDPOINT` | – | mirror outputs to S3 / R2 / MinIO |
 | `FS_MUSIC_DIR` | `music/` | mood library ([music/README.md](music/README.md)) |
+| `FS_SAFE_TOP`, `FS_SAFE_BOTTOM`, `FS_SAFE_RIGHT` | 250 / 580 / 150 | px of a Short that YouTube's own UI covers; captions and title cards stay clear of it |
 
 ## Script format
 

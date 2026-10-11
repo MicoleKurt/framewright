@@ -175,10 +175,10 @@ def captions_ass(words: list[dict], out: str, title: str = "", chunk: int | None
     if FMT.vertical:
         lay = FMT.layout()  # safe-zone aware: nothing sits under the Shorts handle/description
         mh = lay["cap_margin_h"]
-        styles = f"""Style: Cap,Segoe UI Semibold,{lay['cap_font']},&H00F4F7FA,&H00F4F7FA,&H64000000,&H96000000,0,0,0,0,100,100,0.5,0,1,0,4,2,{mh},{mh},{lay['cap_margin_v']},1
+        styles = f"""Style: Cap,Segoe UI Semibold,{lay['cap_font']},&H00F4F7FA,&H00F4F7FA,&H50000000,&H96000000,0,0,0,0,100,100,0.5,0,1,3,2,2,{mh},{mh},{lay['cap_margin_v']},1
 Style: Title,{serif},72,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,1,0,0,100,100,0,0,1,0,3,2,120,120,{lay['lockup_v']},1
-Style: Kicker,{serif},30,&H00C8CDD2,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,12,0,1,0,2,2,{mh},{mh},{lay['kicker_v']},1
-Style: Lockup,{serif},60,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,0,0,0,100,100,6,0,1,0,3,2,{mh},{mh},{lay['lockup_v']},1
+Style: Kicker,{serif},30,&H00DDE1E5,&H00FFFFFF,&H50000000,&H00000000,0,0,0,0,100,100,12,0,1,2,1,2,{mh},{mh},{lay['kicker_v']},1
+Style: Lockup,{serif},60,&H00F4F7FA,&H00FFFFFF,&H50000000,&H78000000,0,0,0,0,100,100,6,0,1,3,2,2,{mh},{mh},{lay['lockup_v']},1
 Style: Rule,Arial,20,{accent},{accent},&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1"""
         rule = rf"{{\an7\pos({lay['rule_x']},{lay['rule_y']})\p1}}m 0 0 l 140 0 140 4 0 4{{\p0}}"
         pos_big = pos_small = ""
@@ -204,11 +204,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
     lines = []
     fade = r"{\fad(500,700)}"
+    halo = r"{\blur2}" if FMT.vertical else ""  # soft dark halo behind text keeps it legible on bright photos
 
     def lockup(start: float, end: float, big: str, small: str) -> None:
         lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Rule,,0,0,0,,{fade}{rule}")
-        lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Lockup,,0,0,0,,{fade}{pos_big}{big}")
-        lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Kicker,,0,0,0,,{fade}{pos_small}{small}")
+        lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Lockup,,0,0,0,,{fade}{halo}{pos_big}{big}")
+        lines.append(f"Dialogue: 1,{_ts(start)},{_ts(end)},Kicker,,0,0,0,,{fade}{halo}{pos_small}{small}")
 
     if chapters:  # long-form: lower-third per chapter; nothing over the cold open (it's the hook)
         for i, (start, name) in enumerate(chapters[1:], start=1):
@@ -230,7 +231,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
                 end = group[j + 1]["start"] if j + 1 < len(group) else linger
                 parts = [g["text"] if k == j else r"{\c&H9AA0A6&}" + g["text"] + r"{\c&HFAF7F4&}"
                          for k, g in enumerate(group)]
-                lines.append(f"Dialogue: 0,{_ts(w['start'])},{_ts(end)},Cap,,0,0,0,,{' '.join(parts)}")
+                lines.append(f"Dialogue: 0,{_ts(w['start'])},{_ts(end)},Cap,,0,0,0,,{halo}{' '.join(parts)}")
     with open(out, "w", encoding="utf-8") as f:
         f.write(header + "\n".join(lines) + "\n")
 
