@@ -60,3 +60,22 @@ Until the audit passes, upload in Studio (or via the browser agent) and let the 
 
 Two uploads a day (US late morning + evening, Eastern), Fri-Sun strongest; adjust from Studio >
 Analytics > Audience > "When your viewers are on YouTube" after ~10 uploads.
+
+## 6. Shorts safe zones (burned-in text)
+
+YouTube publishes no official pixel values; third-party guides disagree. On a 1080x1920 canvas
+the reported *unsafe* margins are: top 225-380, bottom 360-575 (more with the description
+expanded), right 96-192, left ~60. Google's vertical-ad template is the strictest: 288 / 672 / 192 / 48.
+[reformat.video](https://reformat.video/tools/youtube-shorts-safe-zone),
+[youtubetoolkit](https://www.youtubetoolkit.com/blog/youtube-shorts-dimensions),
+[adchecklab](https://adchecklab.com/articles/youtube-shorts-safe-area-dimensions),
+[recast.studio](https://recast.studio/blog/youtube-shorts-dimension).
+Checked against the live mobile player: the channel-handle row starts ~86% of the way down, the
+title ~93%, and the like/comment/share column ~68% down on the right.
+
+**What iframesco does** (`Format.layout()` in `formats.py`, covered by `tests/test_core.py`):
+reserves 250 px top / 580 px bottom / 150 px right, ends captions 20 px above the bottom reserve
+(text baseline area ends at y=1320, two lines fit above it), and stacks the title card and end card
+directly above the captions instead of in the bottom band. The darkening mask starts at y=980, so
+the photo above that is untouched. Captions were previously 78 px with their bottom edge at y=1500,
+inside the handle/description zone.

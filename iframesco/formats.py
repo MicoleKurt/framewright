@@ -14,13 +14,38 @@ class Format:
     crossfade: float          # seconds of overlap between shots
     scene_gap: float          # silence after each paragraph
     thumb: tuple[int, int]
+    # px of the frame the platform's own UI covers (Shorts: search/camera on top, channel handle,
+    # title and description at the bottom, like/comment/share on the right). See docs/RESEARCH.md.
+    safe_top: int = 0
+    safe_bottom: int = 0
+    safe_right: int = 0
 
     @property
     def vertical(self) -> bool:
         return self.h > self.w
 
+    def layout(self) -> dict:
+        """Where burned-in text goes on a vertical canvas. Everything is derived from the safe
+        zone so captions, the title card and the end card cannot drift into the platform UI.
 
-SHORT = Format("short", 1080, 1920, "portrait", True, 4, 2, 0.35, 0.5, (1080, 1920))
+        From the bottom up: [platform UI] > gap > captions (2 lines) > gap > title/end card.
+        """
+        cap_font, line = 70, 88  # px; line height incl. leading
+        cap_bottom = self.h - (self.safe_bottom + 20)          # text baseline area ends here
+        cap_top = cap_bottom - 2 * line                        # two-line phrase
+        kicker_edge = cap_top - 40                             # small brand line sits just above
+        kicker_v = self.h - kicker_edge
+        lockup_v = kicker_v + 55
+        return {
+            "cap_font": cap_font, "cap_margin_v": self.h - cap_bottom,
+            "cap_margin_h": max(120, self.safe_right), "cap_top": cap_top, "cap_bottom": cap_bottom,
+            "kicker_v": kicker_v, "lockup_v": lockup_v,
+            "rule_y": self.h - lockup_v - 122, "rule_x": (self.w - 140) // 2,
+        }
+
+
+SHORT = Format("short", 1080, 1920, "portrait", True, 4, 2, 0.35, 0.5, (1080, 1920),
+               safe_top=250, safe_bottom=580, safe_right=150)
 LONG = Format("long", 1920, 1080, "landscape", False, 7, 2, 0.6, 0.7, (1280, 720))
 
 FORMATS = {f.name: f for f in (SHORT, LONG)}

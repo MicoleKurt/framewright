@@ -59,7 +59,8 @@ def test_long_captions_have_chapter_cards_but_no_burned_words():
         path = os.path.join(tempfile.mkdtemp(), "c.ass")
         words = [{"text": f"w{i}", "start": i * 0.4, "end": i * 0.4 + 0.3} for i in range(50)]
         render.captions_ass(words, path, "T", chapters=[(0, "Intro"), (5, "One"), (12, "Two")])
-        body = open(path, encoding="utf-8").read()
+        with open(path, encoding="utf-8") as f:
+            body = f.read()
         assert "CHAPTER 1" in body and "CHAPTER 2" in body and "Dialogue: 0," not in body
     finally:
         render.use(formats.SHORT)
@@ -114,3 +115,28 @@ def test_script_cleanup_drops_headings_labels_repeats_and_filler():
     again = _clean(["On April 13, 1970, an explosion ripped through the service module, venting oxygen. "
                     "Engineers built an adapter from plastic and tape that night."], "April 13, 1970", [], seen)
     assert again == ["Engineers built an adapter from plastic and tape that night."]
+
+
+def _styles(ass_path: str) -> dict:
+    with open(ass_path, encoding="utf-8") as f:
+        rows = [ln[len("Style: "):].split(",") for ln in f if ln.startswith("Style: ")]
+    # fields: Name, Font, Size, ..., Alignment(18), MarginL(19), MarginR(20), MarginV(21)
+    return {r[0]: {"size": int(r[2]), "ml": int(r[19]), "mr": int(r[20]), "mv": int(r[21])} for r in rows}
+
+
+def test_shorts_text_stays_out_of_platform_ui():
+    """Captions, title card and end card must sit above the handle/description zone and clear of
+    the right-hand buttons; and the title card must not collide with the captions."""
+    F = formats.SHORT
+    render.use(F)
+    path = os.path.join(tempfile.mkdtemp(), "s.ass")
+    render.captions_ass([{"text": "w", "start": 0, "end": 1}], path, "T", brand={"name": "B", "tagline": "t"})
+    st = _styles(path)
+    lay = F.layout()
+    for name in ("Cap", "Kicker", "Lockup"):
+        assert F.h - st[name]["mv"] <= F.h - F.safe_bottom, f"{name} bottom edge enters the bottom UI zone"
+        assert F.w - st[name]["mr"] <= F.w - F.safe_right, f"{name} runs into the right-hand buttons"
+    cap_top = F.h - st["Cap"]["mv"] - 2 * 88
+    assert F.h - st["Kicker"]["mv"] < cap_top, "title card overlaps the captions"
+    assert lay["rule_y"] > F.safe_top, "title card enters the top UI zone"
+    assert lay["cap_font"] == st["Cap"]["size"]

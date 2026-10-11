@@ -166,19 +166,21 @@ def _ass_colour(hex_rgb: str, alpha: str = "00") -> str:
 
 def captions_ass(words: list[dict], out: str, title: str = "", chunk: int | None = None,
                  brand: dict | None = None, chapters: list[tuple[float, str]] | None = None) -> None:
-    """Shorts: karaoke captions (spoken word lit) + title lockup + end card, all in the lower band
-    below the subject's face. Long-form: lower-third chapter cards + end card; captions only when
+    """Shorts: karaoke captions (spoken word lit) + title lockup + end card, kept inside the Shorts
+    safe zone (above the channel handle / description; see Format.layout). Long-form: lower-third chapter cards + end card; captions only when
     the format burns them in (otherwise they ship as an .srt)."""
     chunk = chunk or FMT.caption_words
     accent = _ass_colour((brand or {}).get("accent", "#C88F3B"))
     serif = (brand or {}).get("font_serif", "Georgia")
     if FMT.vertical:
-        styles = f"""Style: Cap,Segoe UI Semibold,78,&H00F4F7FA,&H00F4F7FA,&H64000000,&H96000000,0,0,0,0,100,100,0.5,0,1,0,4,2,120,120,420,1
-Style: Title,{serif},72,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,1,0,0,100,100,0,0,1,0,3,2,120,120,250,1
-Style: Kicker,{serif},30,&H00C8CDD2,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,12,0,1,0,2,2,120,120,195,1
-Style: Lockup,{serif},60,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,0,0,0,100,100,6,0,1,0,3,2,100,100,250,1
+        lay = FMT.layout()  # safe-zone aware: nothing sits under the Shorts handle/description
+        mh = lay["cap_margin_h"]
+        styles = f"""Style: Cap,Segoe UI Semibold,{lay['cap_font']},&H00F4F7FA,&H00F4F7FA,&H64000000,&H96000000,0,0,0,0,100,100,0.5,0,1,0,4,2,{mh},{mh},{lay['cap_margin_v']},1
+Style: Title,{serif},72,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,1,0,0,100,100,0,0,1,0,3,2,120,120,{lay['lockup_v']},1
+Style: Kicker,{serif},30,&H00C8CDD2,&H00FFFFFF,&H00000000,&H00000000,0,0,0,0,100,100,12,0,1,0,2,2,{mh},{mh},{lay['kicker_v']},1
+Style: Lockup,{serif},60,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,0,0,0,100,100,6,0,1,0,3,2,{mh},{mh},{lay['lockup_v']},1
 Style: Rule,Arial,20,{accent},{accent},&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1"""
-        rule = r"{\an7\pos(470,1548)\p1}m 0 0 l 140 0 140 4 0 4{\p0}"
+        rule = rf"{{\an7\pos({lay['rule_x']},{lay['rule_y']})\p1}}m 0 0 l 140 0 140 4 0 4{{\p0}}"
         pos_big = pos_small = ""
     else:
         styles = f"""Style: Cap,Segoe UI Semibold,52,&H00F4F7FA,&H00F4F7FA,&H64000000,&H96000000,0,0,0,0,100,100,0.3,0,1,0,3,2,200,200,64,1
@@ -259,7 +261,7 @@ def srt(words: list[dict], out: str, size: int = 9) -> None:
 def shade(out: str) -> None:
     """Darkening mask so overlays read on any photo: top/bottom bands (Shorts), lower-left (long)."""
     if FMT.vertical:
-        alpha = (r"255*(0.78*pow(clip((Y-1000)/920\,0\,1)\,1.4)"
+        alpha = (r"255*(0.72*pow(clip((Y-980)/440\,0\,1)\,1.3)"
                  r"+0.55*pow(clip((520-Y)/520\,0\,1)\,1.6))")
     else:
         alpha = r"255*0.7*pow(clip((Y-620)/460\,0\,1)\,1.5)*clip(1.25-X/1500\,0\,1)"
