@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "framewright"
 version = "1.0.0"
-description = "Topic in, publish-ready YouTube video out. Shorts and long-form, free and local."
+description = "Open-source video generator for Shorts and long-form. Free and local."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

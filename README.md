@@ -2,7 +2,7 @@
   <img src="assets/logo.svg" alt="Framewright" width="260">
 </p>
 
-<p align="center"><b>Topic in. Publish-ready YouTube video out.</b><br>
+<p align="center"><b>Open-source video generator for Shorts and long-form.</b><br>
 Shorts and long-form documentaries, written from real sources, narrated, cut, captioned, chaptered and packaged.<br>
 Free and local: no API bills, no watermark, your machine.</p>
 

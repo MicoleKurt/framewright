@@ -61,7 +61,7 @@ def _upload(yt, x):
 
 
 def main(argv: list[str] | None = None) -> None:
-    p = argparse.ArgumentParser(prog="framewright", description="Topic in, publish-ready YouTube video out.")
+    p = argparse.ArgumentParser(prog="framewright", description="Open-source video generator for Shorts and long-form.")
     sub = p.add_subparsers(dest="command", required=True)
 
     m = sub.add_parser("make", help="render a video")
