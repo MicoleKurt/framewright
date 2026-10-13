@@ -159,3 +159,10 @@ def test_safe_zone_is_overridable_and_preview_renders(monkeypatch, tmp_path):
     with Image.open(out) as im:
         assert im.size == (1080, 1920)
     render.use(formats.SHORT)
+
+
+def test_blocked_titles():
+    from iframesco import relevance
+    assert relevance.blocked({"title": "Minstrel show poster 1899.jpg"})
+    assert relevance.blocked({"title": "x", "url": "https://upload.wikimedia.org/a/Blackface_actor.jpg"})
+    assert not relevance.blocked({"title": "McGraw-Hill Building New York.jpg"})

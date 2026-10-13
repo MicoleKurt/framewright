@@ -18,7 +18,10 @@ PRESETS = {
     "warm":        ("edge", "en-US-BrianMultilingualNeural", -6, "-1Hz"),
     "british":     ("edge", "en-GB-RyanNeural", -5, "-1Hz"),
     "energetic":   ("edge", "en-US-AndrewMultilingualNeural", 6, ""),
+    "narrator":    ("edge", "en-US-AndrewMultilingualNeural", 4, ""),  # clear, brisk documentary read
 }
+_EDGE_GAP = 2.0  # seconds between edge requests
+_last_edge = [0.0]
 DEFAULT = os.getenv("FS_VOICE", "soothing")
 
 
@@ -101,7 +104,7 @@ def _kokoro(text: str, path: str, voice: str, rate: int) -> list[dict]:
 
 
 def synthesize(text: str, stem: str, preset: str | None = None, rate: int | None = None,
-               pronounce: dict[str, str] | None = None, retries: int = 4) -> tuple[str, list[dict]]:
+               pronounce: dict[str, str] | None = None, retries: int = 6) -> tuple[str, list[dict]]:
     """Speak `text` to `stem`.wav/.mp3. Returns (audio path, word timings)."""
     engine, voice, base_rate, pitch = resolve(preset)
     rate = base_rate if rate is None else rate
@@ -111,11 +114,14 @@ def synthesize(text: str, stem: str, preset: str | None = None, rate: int | None
         return path, _remap(_kokoro(spoken, path, voice, rate), plan)
     import edge_tts
     path = stem + ".mp3"
-    for attempt in range(retries):  # edge occasionally drops a stream
+    for attempt in range(retries):  # edge throttles bursts of requests: pace them, back off hard on a miss
+        time.sleep(max(0.0, _EDGE_GAP - (time.time() - _last_edge[0])))
         try:
             return path, _remap(asyncio.run(_edge(spoken, path, voice, rate, pitch)), plan)
         except edge_tts.exceptions.NoAudioReceived:
             if attempt == retries - 1:
                 raise
-            time.sleep(1.5 * (attempt + 1))
+            time.sleep(10 * (attempt + 1))
+        finally:
+            _last_edge[0] = time.time()
     raise RuntimeError("unreachable")

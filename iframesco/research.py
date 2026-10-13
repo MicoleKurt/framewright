@@ -53,13 +53,17 @@ def _strip_html(s: str) -> str:
     return re.sub(r"<[^>]+>", "", s or "").strip()
 
 
+HD_WIDTH = int(os.getenv("FS_IMG_WIDTH", "1920"))  # photos are fetched at HD so 1080p/vertical crops stay sharp
+MIN_WIDTH = int(os.getenv("FS_MIN_IMG_WIDTH", "1400"))
+
+
 def commons_images(query: str, limit: int = 8) -> list[dict]:
     """Photos from Wikimedia Commons matching the query, with licence + author for credits."""
     r = _api(COMMONS, {
         "action": "query", "generator": "search", "gsrsearch": f"filetype:bitmap {query}",
         "gsrnamespace": 6, "gsrlimit": limit * 2, "prop": "imageinfo",
         "iiprop": "url|size|mime|extmetadata", "iiextmetadatafilter": "LicenseShortName|Artist",
-        "iiurlwidth": 1280,  # standard thumb size: cached, not rate-limited like odd widths
+        "iiurlwidth": HD_WIDTH,  # standard thumb step (1280/1600/1920): cached, not rate-limited like odd widths
     })
     out = []
     for p in sorted(r.get("query", {}).get("pages", {}).values(), key=lambda p: p.get("index", 0)):
@@ -69,13 +73,14 @@ def commons_images(query: str, limit: int = 8) -> list[dict]:
         full = info.get("thumburl") or info["url"]
         meta = info.get("extmetadata", {})
         out.append({
-            "url": full, "preview": full.replace("/1280px-", "/330px-"), "kind": "image",
+            "url": full, "preview": re.sub(r"/\d+px-", "/330px-", full), "kind": "image",
             "source": "Wikimedia Commons", "title": p.get("title", "").removeprefix("File:"),
             "credit": _strip_html(meta.get("Artist", {}).get("value", "")),
             "license": meta.get("LicenseShortName", {}).get("value", ""),
-            "page": info.get("descriptionurl", ""),
+            "page": info.get("descriptionurl", ""), "width": info.get("width", 0),
         })
-    return out[:limit]
+    hd = [c for c in out if c["width"] >= MIN_WIDTH]  # prefer HD, but a sharp small portrait beats no portrait
+    return (hd + [c for c in out if c["width"] < MIN_WIDTH])[:limit]
 
 
 def pexels_videos(query: str, limit: int = 3, orientation: str = "portrait") -> list[dict]:
