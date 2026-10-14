@@ -55,13 +55,29 @@ def enc() -> list[str]:
 
 # ---------------------------------------------------------------- shots
 
+def _too_wide(img: str) -> bool:
+    """True when cropping the photo to the canvas would cut away more than ~45% of it."""
+    try:
+        from PIL import Image
+        with Image.open(img) as im:
+            w, h = im.size
+    except Exception:
+        return False
+    return (w / h) / (W / H) > 1.8
+
+
 def still_clip(img: str, out: str, dur: float, variant: int) -> None:
     """Slow zoom/pan over a still image (Ken Burns), alternating motion per shot."""
     frames = max(1, round(dur * FPS))
     zoom = f"1+0.12*on/{frames}" if variant % 2 == 0 else f"1.12-0.12*on/{frames}"
     pan_x = ["iw/2-(iw/zoom/2)", "(iw-iw/zoom)*on/{f}", "(iw-iw/zoom)*(1-on/{f})"][variant % 3]
     bw, bh = W * 3 // 2, H * 3 // 2  # oversample so the zoom stays sharp
-    vf = (f"scale={bw}:{bh}:force_original_aspect_ratio=increase,crop={bw}:{bh},"
+    frame = f"scale={bw}:{bh}:force_original_aspect_ratio=increase,crop={bw}:{bh},"
+    if _too_wide(img):  # a wide photo on a tall canvas: show all of it over a blurred copy instead of cropping heads off
+        zoom = f"1+0.06*on/{frames}" if variant % 2 == 0 else f"1.06-0.06*on/{frames}"
+        frame = (f"split[a][b];[a]scale={bw}:{bh}:force_original_aspect_ratio=increase,crop={bw}:{bh},"
+                 f"boxblur=40:3,eq=brightness=-0.18[bg];[b]scale={bw}:-2[fg];[bg][fg]overlay=0:(H-h)/2,")
+    vf = (frame +
           f"zoompan=z='{zoom}':x='{pan_x.format(f=frames)}':y='ih/2-(ih/zoom/2)'"
           f":d={frames}:s={W}x{H}:fps={FPS},setsar=1")
     ff("-i", img, "-vf", vf, "-frames:v", str(frames), *enc(), "-an", out)

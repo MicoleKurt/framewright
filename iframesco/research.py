@@ -192,18 +192,29 @@ def download(url: str, path: str, retries: int = 4) -> str:
         shutil.copyfile(cached, path)
         return path
     if "wikimedia.org" in url:
-        time.sleep(0.4 + random.random() * 0.4)  # be polite: serial, spaced requests
+        time.sleep(1.2 + random.random() * 0.8)  # be polite: serial, spaced requests (upload.wikimedia.org 429s bursts)
     for attempt in range(retries):
         with requests.get(url, headers=UA, timeout=60, stream=True) as r:
+            if r.status_code == 429 and "upload.wikimedia.org" in url and attempt == retries - 1:
+                break  # still throttled: use the Special:FilePath fallback below
             if r.status_code == 429 and attempt < retries - 1:
                 wait = r.headers.get("Retry-After", "")
-                time.sleep(float(wait) if wait.isdigit() else 4 * 2 ** attempt)
+                time.sleep(float(wait) if wait.isdigit() else min(30, 6 * 2 ** attempt))
                 continue
             r.raise_for_status()
             with open(cached + ".part", "wb") as f:
                 for chunk in r.iter_content(1 << 16):
                     f.write(chunk)
             os.replace(cached + ".part", cached)
+            shutil.copyfile(cached, path)
+            return path
+    if "upload.wikimedia.org" in url:  # the CDN throttles cold files; Special:FilePath serves the same file
+        name = re.sub(r"^\d+px-", "", url.split("?")[0].rsplit("/", 1)[-1])
+        alt = f"https://commons.wikimedia.org/wiki/Special:FilePath/{name}"
+        r = requests.get(alt, headers=UA, timeout=90)
+        if r.ok and r.content:
+            with open(cached, "wb") as f:
+                f.write(r.content)
             shutil.copyfile(cached, path)
             return path
     raise RuntimeError(f"download failed: {url}")

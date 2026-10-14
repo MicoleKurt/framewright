@@ -64,7 +64,8 @@ def _candidates(scene: dict, subject: str, fmt, use_youtube: bool, work: str, id
         elif not wiki_only:
             cands += research.stock_videos(q, 2, fmt.orientation)
             cands += research.commons_images(q, 6)
-    if len(cands) < 3:
+    exact = all(k.lower().startswith("file:") for k in scene.get("keywords") or ["-"])
+    if len(cands) < 3 and not exact:  # hand-picked files: never pad with other pictures
         cands += research.wiki_images(subject) or research.commons_images(subject, 6)
     seen, out = set(), []
     for c in cands:
