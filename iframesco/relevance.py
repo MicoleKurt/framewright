@@ -27,6 +27,7 @@ UNSAFE = ("a racist caricature cartoon", "a minstrel show poster", "a blackface 
 OFF_TOPIC = {  # weak shots for a story: allowed only when the line asks for them
     "map": "a map", "plan": "an architectural plan or technical drawing", "diagram": "a diagram",
     "document": "a page of printed text", "logo": "a logo on a plain background",
+    "snapshot": "a casual snapshot of a stranger posing for the camera",
 }
 OFF_TOPIC_PENALTY = 0.04
 

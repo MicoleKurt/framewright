@@ -55,11 +55,17 @@ def _candidates(scene: dict, subject: str, fmt, use_youtube: bool, work: str, id
         if clip:
             credits.append({k: v for k, v in clip.items() if k != "path"})
             cands.append({"file": clip["path"], "kind": "video", "source": "YouTube (CC BY)", "preview": ""})
-    for q in dict.fromkeys(queries):
-        cands += research.stock_videos(q, 2, fmt.orientation)
-        cands += research.commons_images(q, 6)
+    wiki_only = scene.get("images") == "wiki"
+    for raw, q in dict.fromkeys(zip(scene.get("keywords") or [subject], queries)):
+        if raw.lower().startswith("file:"):  # an exact file, chosen by a person: used as-is, in order
+            cands += research.file_image(raw[5:].strip())
+        elif raw.lower().startswith("wiki:"):  # photos from that Wikipedia article: hand-picked, on topic
+            cands += research.wiki_images(raw[5:].strip())
+        elif not wiki_only:
+            cands += research.stock_videos(q, 2, fmt.orientation)
+            cands += research.commons_images(q, 6)
     if len(cands) < 3:
-        cands += research.commons_images(subject, 6)
+        cands += research.wiki_images(subject) or research.commons_images(subject, 6)
     seen, out = set(), []
     for c in cands:
         key = c.get("file") or c["url"]
@@ -92,7 +98,8 @@ def _gather(scene: dict, idx: int, work: str, subject: str, fmt, ranker: relevan
             except Exception as e:
                 print(f"[media] skip {c.get('url')}: {e}")
 
-    take(ranker.rank(text, cands, keep=shots + 2))
+    exact = all(k.lower().startswith("file:") for k in scene.get("keywords") or ["-"])
+    take(cands if exact else ranker.rank(text, cands, keep=shots + 2))
     if not chosen:  # all duplicates of earlier shots or failed: take search order, not a blank card
         take(cands[:shots + 2])
     return chosen
@@ -156,7 +163,8 @@ def generate(topic: str, out_dir: str = "output", fmt: str = "short", scenes: in
         offset += d
     chapters = chapter_list(plan, starts) if F.name == "long" else []
     _write_json(f"{work}/words.json", words)  # lets a render be re-captioned/re-mixed without re-voicing
-    render.captions_ass(words, f"{work}/captions.ass", plan["title"], brand=brand, chapters=chapters)
+    render.captions_ass(words, f"{work}/captions.ass", plan["title"], brand=brand, chapters=chapters,
+                       hook=plan.get("hook_text"))
 
     # ------------------------------------------------ visuals
     progress("Finding footage & images", 42)
@@ -165,6 +173,8 @@ def generate(topic: str, out_dir: str = "output", fmt: str = "short", scenes: in
     for i, (sc, d) in enumerate(zip(plan["scenes"], durations)):
         progress(f"Finding footage {i + 1}/{n}", 42 + 18 * i / n)
         shots = F.shots_per_scene if F.name == "short" else max(1, min(3, round(d / 9)))
+        if F.name == "short" and i == 0:
+            shots += 1  # faster first cut: a new picture by ~1.5 s holds the scroller
         media.append(_gather(sc, i, work, subject, F, ranker, shots, use_youtube, credits))
     plan["credits"] = credits
 

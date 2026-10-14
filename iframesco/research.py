@@ -83,6 +83,59 @@ def commons_images(query: str, limit: int = 8) -> list[dict]:
     return (hd + [c for c in out if c["width"] < MIN_WIDTH])[:limit]
 
 
+SKIP_FILE = ("logo", "icon", "flag of", "signature", "symbol", "wordmark", "seal of", "stub", "question book",
+             "padlock", "commons-", "wiktionary", "edit-clear", "disambig", "ambox", "crystal ")
+
+
+def wiki_images(article: str, limit: int = 12) -> list[dict]:
+    """Photos used in a Wikipedia article. Editors already picked them for that article, so they are
+    about the subject (unlike a free-text Commons search). Logos, flags and UI icons are skipped."""
+    r = _api(WIKI, {
+        "action": "query", "titles": article, "redirects": 1, "generator": "images", "gimlimit": 60,
+        "prop": "imageinfo", "iiprop": "url|size|mime|extmetadata",
+        "iiextmetadatafilter": "LicenseShortName|Artist|ImageDescription", "iiurlwidth": HD_WIDTH,
+    })
+    out = []
+    for p in r.get("query", {}).get("pages", {}).values():
+        title = p.get("title", "").removeprefix("File:")
+        info = (p.get("imageinfo") or [{}])[0]
+        if info.get("mime") not in ("image/jpeg", "image/png") or info.get("width", 0) < 500:
+            continue
+        if any(w in title.lower() for w in SKIP_FILE):
+            continue
+        full = info.get("thumburl") or info["url"]
+        meta = info.get("extmetadata", {})
+        out.append({
+            "url": full, "preview": re.sub(r"/\d+px-", "/330px-", full), "kind": "image",
+            "source": "Wikimedia Commons", "title": title, "article": article,
+            "description": _strip_html(meta.get("ImageDescription", {}).get("value", ""))[:300],
+            "credit": _strip_html(meta.get("Artist", {}).get("value", "")),
+            "license": meta.get("LicenseShortName", {}).get("value", ""),
+            "page": info.get("descriptionurl", ""), "width": info.get("width", 0),
+        })
+    return out[:limit]
+
+
+def file_image(title: str) -> list[dict]:
+    """One exact Wikimedia Commons file (e.g. picked from an article), as a candidate list of 0 or 1."""
+    name = title if title.startswith("File:") else f"File:{title}"
+    r = _api(COMMONS, {"action": "query", "titles": name, "prop": "imageinfo",
+                       "iiprop": "url|size|mime|extmetadata", "iiextmetadatafilter": "LicenseShortName|Artist",
+                       "iiurlwidth": HD_WIDTH})
+    for p in r.get("query", {}).get("pages", {}).values():
+        info = (p.get("imageinfo") or [{}])[0]
+        if not info.get("url"):
+            return []
+        full = info.get("thumburl") or info["url"]
+        meta = info.get("extmetadata", {})
+        return [{"url": full, "preview": re.sub(r"/\d+px-", "/330px-", full), "kind": "image",
+                 "source": "Wikimedia Commons", "title": name.removeprefix("File:"),
+                 "credit": _strip_html(meta.get("Artist", {}).get("value", "")),
+                 "license": meta.get("LicenseShortName", {}).get("value", ""),
+                 "page": info.get("descriptionurl", ""), "width": info.get("width", 0)}]
+    return []
+
+
 def pexels_videos(query: str, limit: int = 3, orientation: str = "portrait") -> list[dict]:
     """Stock footage from Pexels (free key). Pexels licence: free to use, no attribution required."""
     key = os.getenv("PEXELS_API_KEY")

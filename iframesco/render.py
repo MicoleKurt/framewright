@@ -165,7 +165,8 @@ def _ass_colour(hex_rgb: str, alpha: str = "00") -> str:
 
 
 def captions_ass(words: list[dict], out: str, title: str = "", chunk: int | None = None,
-                 brand: dict | None = None, chapters: list[tuple[float, str]] | None = None) -> None:
+                 brand: dict | None = None, chapters: list[tuple[float, str]] | None = None,
+                 hook: str | None = None) -> None:
     """Shorts: karaoke captions (spoken word lit) + title lockup + end card, kept inside the Shorts
     safe zone (above the channel handle / description; see Format.layout). Long-form: lower-third chapter cards + end card; captions only when
     the format burns them in (otherwise they ship as an .srt)."""
@@ -179,7 +180,8 @@ def captions_ass(words: list[dict], out: str, title: str = "", chunk: int | None
 Style: Title,{serif},72,&H00F4F7FA,&H00FFFFFF,&H00000000,&H78000000,0,1,0,0,100,100,0,0,1,0,3,2,120,120,{lay['lockup_v']},1
 Style: Kicker,{serif},30,&H00DDE1E5,&H00FFFFFF,&H50000000,&H00000000,0,0,0,0,100,100,12,0,1,2,1,2,{mh},{mh},{lay['kicker_v']},1
 Style: Lockup,{serif},60,&H00F4F7FA,&H00FFFFFF,&H50000000,&H78000000,0,0,0,0,100,100,6,0,1,3,2,2,{mh},{mh},{lay['lockup_v']},1
-Style: Rule,Arial,20,{accent},{accent},&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1"""
+Style: Rule,Arial,20,{accent},{accent},&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Hook,{serif},96,&H00F4F7FA,&H00FFFFFF,&H64000000,&H96000000,1,0,0,0,100,100,2,0,1,4,3,8,{mh},{mh},0,1"""
         rule = rf"{{\an7\pos({lay['rule_x']},{lay['rule_y']})\p1}}m 0 0 l 140 0 140 4 0 4{{\p0}}"
         pos_big = pos_small = ""
     else:
@@ -218,6 +220,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         lockup(0.2, 4.2, title.upper(), brand["name"].upper())
     elif title:
         lines.append(f"Dialogue: 1,0:00:00.35,0:00:03.60,Title,,0,0,0,,{fade}{title}")
+    if hook and FMT.vertical:  # frame-1 hook: the claim a scroller reads before deciding to swipe
+        y = FMT.layout()["cap_top"] - 290  # lower third of the picture: portraits keep their face clear
+        pop = r"{\fscx86\fscy86\t(0,160,\fscx100\fscy100)\fad(0,300)}"
+        text = hook.upper().replace("\n", r"\N")
+        lines.append(f"Dialogue: 2,{_ts(0.0)},{_ts(2.0)},Hook,,0,0,0,,{pop}{halo}{{\\an8\\pos({W // 2},{y})}}{text}")
     if brand and words:  # end card: channel name + tagline
         end = words[-1]["end"] + 0.35
         lockup(end - 2.6, end + 0.2, brand["name"].upper(), brand.get("tagline", "").upper())

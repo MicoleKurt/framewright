@@ -166,3 +166,17 @@ def test_blocked_titles():
     assert relevance.blocked({"title": "Minstrel show poster 1899.jpg"})
     assert relevance.blocked({"title": "x", "url": "https://upload.wikimedia.org/a/Blackface_actor.jpg"})
     assert not relevance.blocked({"title": "McGraw-Hill Building New York.jpg"})
+
+
+def test_exact_file_keywords_skip_ranking(monkeypatch, tmp_path):
+    from iframesco import pipeline, research
+    monkeypatch.setattr(research, "file_image", lambda t: [{"url": f"u/{t}", "kind": "image", "title": t}])
+    monkeypatch.setattr(research, "download", lambda url, path: path)
+
+    class NoRank:
+        def rank(self, *a, **k):
+            raise AssertionError("exact files must not be re-ranked")
+    scene = {"narration": "x", "keywords": ["file:B.jpg", "file:A.jpg"], "anchor": False}
+    got = pipeline._gather(scene, 0, str(tmp_path), "S", type("F", (), {"orientation": "portrait"})(),
+                           NoRank(), 2, False, [])
+    assert [c["title"] for c in got] == ["B.jpg", "A.jpg"]
