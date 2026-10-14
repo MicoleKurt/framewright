@@ -135,6 +135,18 @@ Write your own script and keep everything else automated:
 
 `anchor: false` uses keywords as-is; `chapter` starts a chapter (long-form); `rate` / `pause` tune pacing per scene.
 
+**Accurate images.** A keyword can point at Wikipedia instead of a free-text search:
+
+- `"wiki:Apollo 13"` uses the photos editors placed in that Wikipedia article (logos, flags and icons skipped), ranked against the line.
+- `"file:Apollo 13 Mission Control.jpg"` uses that exact Wikimedia Commons file. When every keyword of a scene is a `file:`, the photos are used in the order given.
+
+Archive results are filtered: files whose titles name offensive or explicit material are dropped, CLIP rejects images that look like
+them, and maps, plans and casual snapshots rank lower unless the line asks for them.
+
+**Frame-1 hook (Shorts).** `"hook_text": "Two words
+that stop the scroll"` shows a large line for the first two seconds, low in the
+frame so faces stay clear, and the first scene cuts to a new picture sooner.
+
 ## Licensing of what you publish
 
 iframesco's code is MIT. Media keeps its own licence: Commons files are credited automatically in
