@@ -180,3 +180,22 @@ def test_exact_file_keywords_skip_ranking(monkeypatch, tmp_path):
     got = pipeline._gather(scene, 0, str(tmp_path), "S", type("F", (), {"orientation": "portrait"})(),
                            NoRank(), 2, False, [])
     assert [c["title"] for c in got] == ["B.jpg", "A.jpg"]
+
+
+def test_pronoun_from_source():
+    from iframesco import script
+    assert script.pronoun("She was born in 1900. Her father was a baker. She left school and she sang.") == "her"
+    assert script.pronoun("The bridge opened in 1937. It spans the strait.") == "its"
+
+
+def test_pick_images_maps_numbers_to_exact_files(monkeypatch):
+    import json
+    from iframesco import research, script
+    pool = [{"title": "A.jpg", "description": "school"}, {"title": "B.jpg", "description": "final"}]
+    monkeypatch.setattr(research, "wiki_images", lambda a, n=12: pool)
+    monkeypatch.setattr(script, "with_queries", lambda paras, subj: [{"narration": p, "keywords": [subj]} for p in paras])
+    monkeypatch.setattr(script, "ask", lambda *a, **k: json.dumps({"picks": [[1], [2, 9], []]}))
+    scenes = script.pick_images(["one", "two", "three"], "Article", "S")
+    assert scenes[0]["keywords"] == ["file:A.jpg", "wiki:Article"]
+    assert scenes[1]["keywords"] == ["file:B.jpg", "wiki:Article"]  # 9 is out of range and ignored
+    assert scenes[2]["keywords"] == ["S"]  # nothing fit: falls back to search queries

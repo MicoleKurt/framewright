@@ -24,21 +24,71 @@ STYLE = """Style rules:
 - Never use these words: """ + ", ".join(BANNED_WORDS) + "."
 
 # ---------------------------------------------------------------- Shorts
+# Written for 7-8B local models: one job per prompt, numbered hard limits, a worked example to copy
+# the *shape* (not the facts) from, and a self-check list the model reads last.
 
-SHORT_NARRATION = """Write the narration for a YouTube Short (under 60 seconds) about: {topic}
+SHORT_EXAMPLE = """Example of the shape (different subject; copy the structure, never these facts):
+Everyone knows the Wright brothers flew. Few know they were bicycle mechanics with no college degrees.
 
-SOURCE:
+In 1896 Orville and Wilbur Wright ran a small bicycle shop in Dayton, Ohio. They read every paper on flight they could find.
+
+By 1900 they were testing gliders on the windy dunes of Kitty Hawk. The first ones barely lifted off the sand.
+
+The published lift tables were wrong. So in 1901 they built their own wind tunnel and tested two hundred wing shapes.
+
+On December 17, 1903, their engine plane flew for twelve seconds. Everyone knows how their story ends. This is how it started."""
+
+SHORT_NARRATION = """You write narration for a 40-second YouTube Short about how a famous person or thing STARTED.
+
+SUBJECT: {topic}
+
+SOURCE (the only facts you may use):
 {facts}
 
-Write exactly {n} paragraphs separated by blank lines, 2 sentences each, 20 to 30 words per paragraph.
-Follow this shape (a proven Shorts template):
-1. HOOK: the famous end, then a surprising true loss, twist or myth-flip. First sentence 14 words or fewer. Do not answer it yet.
-2. REWIND: jump back to a year and the lowest point.
-3. RISE: a first real win, with a name and a number.
-4. CONFLICT: the betrayal or setback, with concrete names, dates and numbers.
-5. TURN: the decision that changed everything.
-6. PAYOFF: close the hook from paragraph 1, and echo its wording in the last sentence so the video loops.
+{example}
+
+Write exactly {n} paragraphs separated by blank lines.
+Hard limits:
+1. 18 to 28 words per paragraph, 1 or 2 sentences. About 120 words in total.
+2. Paragraph 1 is the HOOK. Sentence one is 12 words or fewer and names the subject plus a surprising,
+   true contrast between the famous end and an unknown beginning. Do not resolve it.
+3. Paragraph 2 jumps back in time and opens with a year from SOURCE ("In 1939, ...").
+4. Every paragraph contains at least one concrete detail from SOURCE: a year, a place, a person or a number.
+5. The middle paragraphs move forward in time: first setback, first win, the turning decision.
+6. The last paragraph is the payoff. It ends with exactly: "Everyone knows how {pronoun} story ends. This is how it started."
+7. Present facts as facts. If SOURCE says something is a claim or legend, say "according to" or "by his own account".
+
+Before answering, check: no invented years, numbers, names or quotes; no greetings; no questions to the viewer;
+no exclamation marks; no headings or labels; none of the banned words.
 {style}"""
+
+SHORT_PACKAGE = """You package a YouTube Short so people stop scrolling and click.
+
+NARRATION:
+{narration}
+
+Return JSON with:
+- "title": max 60 characters. The story's hook with one concrete detail, then " | {subject}".
+  It must be true to the narration and must not reuse the exact words of hook_text.
+- "hook_text": 2 to 4 words shown in big letters on the first frame. The single most surprising claim
+  from paragraph 1, e.g. "TOO SHORT FOR VARSITY". No subject name.
+- "thumbnail_hook": 2 to 4 words that start with "Before", e.g. "Before the shot". Different from hook_text.
+- "first_line": one sentence for the top of the description, under 120 characters, with the subject's name.
+- "tags": 10 search phrases people would type, most specific first.
+Reply with JSON only."""
+
+IMAGE_PICK = """Pick a picture for each line of a video narration.
+
+LINES:
+{lines}
+
+PICTURES (from Wikipedia articles about the subject):
+{images}
+
+For each line, choose up to 2 picture numbers that show what the line is about: the same person, place,
+event or time period. Prefer a picture of the exact moment or place named in the line. Use a picture at
+most twice in the whole video. If no picture fits a line, give an empty list for that line.
+Reply with JSON only: {{"picks": [[int, ...], ...]}} with exactly {n} lists, in line order."""
 
 QUERIES = """For each numbered narration line below, give 2 image search queries of 2-4 words
 for finding a matching photograph or film still. Queries must be concrete and photographable, and

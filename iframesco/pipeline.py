@@ -125,7 +125,7 @@ def generate(topic: str, out_dir: str = "output", fmt: str = "short", scenes: in
         progress("Using provided script", 12)
     else:
         progress("Researching topic on Wikipedia", 4)
-        facts = research.wiki_facts(topic, full=F.name == "long")
+        facts = research.wiki_facts(topic, full=True)  # Shorts pick early-life sections from the full article
         progress(f"Writing script with {script.model()}", 8)
         if F.name == "long":
             steps = [0]

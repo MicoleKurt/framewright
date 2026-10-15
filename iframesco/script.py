@@ -9,7 +9,7 @@ import re
 
 import requests
 
-from . import factcheck, prompts
+from . import factcheck, prompts, research
 from .music import MOODS
 
 OLLAMA = os.getenv("OLLAMA_URL", "http://localhost:11434")
@@ -126,20 +126,75 @@ def with_queries(paras: list[str], subj: str) -> list[dict]:
 
 # ---------------------------------------------------------------- Shorts
 
-def write_short(topic: str, facts: dict, n_scenes: int = 6, attempts: int = 2) -> dict:
+def pronoun(text: str) -> str:
+    """'his' / 'her' / 'their' / 'its' for the closing line, from how the source refers to the subject."""
+    t = " " + text[:4000].lower() + " "
+    counts = {"his": t.count(" he ") + t.count(" his "), "her": t.count(" she ") + t.count(" her "),
+              "their": t.count(" they ") + t.count(" their ")}
+    best = max(counts, key=counts.get)
+    return best if counts[best] >= 3 else "its"
+
+
+def pick_images(paras: list[str], article: str, subj: str) -> list[dict]:
+    """Choose photos from the subject's Wikipedia article for each line; search queries fill the gaps."""
+    pool = research.wiki_images(article, 40) if article else []
+    picks: list = []
+    if pool:
+        images = "\n".join(f"{i + 1}. {c['title']} - {c.get('description', '')[:110]}" for i, c in enumerate(pool))
+        lines = "\n".join(f"{i + 1}. {p}" for i, p in enumerate(paras))
+        try:
+            picks = json.loads(ask(prompts.IMAGE_PICK.format(lines=lines, images=images, n=len(paras)),
+                                   json_mode=True, temperature=0.2, ctx=16384)).get("picks", [])
+        except Exception as e:
+            print(f"[script] image picking failed ({e}); using search queries")
+    scenes, used = with_queries(paras, subj), {}
+    for i, sc in enumerate(scenes):
+        chosen = []
+        for k in (picks[i] if i < len(picks) and isinstance(picks[i], list) else []):
+            if isinstance(k, int) and 1 <= k <= len(pool) and used.get(k, 0) < 2:
+                used[k] = used.get(k, 0) + 1
+                chosen.append(f"file:{pool[k - 1]['title']}")
+        if chosen:  # exact Wikipedia photos first, ranked search as the second shot when only one was picked
+            sc["keywords"] = chosen[:2] if len(chosen) > 1 else chosen + [f"wiki:{article}"]
+    return scenes
+
+
+def package(paras: list[str], subj: str, facts: dict) -> dict:
+    """Title, frame-1 hook, thumbnail line and tags, written from the finished narration."""
+    try:
+        meta = json.loads(ask(prompts.SHORT_PACKAGE.format(narration="\n\n".join(paras), subject=subj),
+                              json_mode=True, temperature=0.5))
+    except Exception as e:
+        print(f"[script] packaging failed ({e})")
+        meta = {}
+    title = str(meta.get("title") or facts["title"])[:100]
+    hook = str(meta.get("thumbnail_hook") or f"Before {subj}")
+    first = str(meta.get("first_line") or paras[0])
+    desc = f"{first}\n\nSource: {facts['title']}, Wikipedia ({facts.get('url', '')})"
+    return {"hook_text": str(meta.get("hook_text") or "")[:40] or None,
+            "thumbnail": {"label": subj, "hook": _two_lines(hook), "scene": 0},
+            "youtube": {"title": title, "description": desc,
+                        "tags": [t for t in meta.get("tags", []) if isinstance(t, str)][:15]}}
+
+
+def write_short(topic: str, facts: dict, n_scenes: int = 5, attempts: int = 2) -> dict:
     title, report = facts["title"], []
+    # origin stories live in the early sections; keep the prompt small enough for an 8B model
+    src = _relevant(facts["text"], "early life childhood youth education career began first", 3500)         if len(facts["text"]) > 3500 else facts["text"]
     for attempt in range(attempts):
         try:
-            prose = ask(prompts.SHORT_NARRATION.format(topic=topic, facts=facts["text"][:3000] or "(none)",
-                                                       n=n_scenes, style=prompts.STYLE),
-                        temperature=0.6 + 0.1 * attempt)
+            prose = ask(prompts.SHORT_NARRATION.format(
+                topic=topic, facts=src or "(none)", n=n_scenes, example=prompts.SHORT_EXAMPLE,
+                pronoun=pronoun(facts["text"]), style=prompts.STYLE), temperature=0.6 + 0.1 * attempt)
             paras = _clean(_paragraphs(prose), facts["text"], report)[:n_scenes]
             if len(paras) < 3:
                 raise ValueError(f"weak script ({len(paras)} usable paragraphs)")
             subj = subject(topic, title)
-            return {"title": title, "subject": subj, "format": "short", "source": "llm",
+            plan = {"title": title, "subject": subj, "format": "short", "source": "llm",
                     "sources": [facts.get("url", "")], "factcheck_dropped": report,
-                    "scenes": with_queries(paras, subj)}
+                    "scenes": pick_images(paras, title, subj)}
+            plan.update({k: v for k, v in package(paras, subj, facts).items() if v})
+            return plan
         except Exception as e:
             print(f"[script] attempt {attempt + 1} failed: {e}")
     return fallback(topic, facts, n_scenes)
