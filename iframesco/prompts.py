@@ -55,8 +55,12 @@ Hard limits:
 3. Paragraph 2 jumps back in time and opens with a year from SOURCE ("In 1939, ...").
 4. Every paragraph contains at least one concrete detail from SOURCE: a year, a place, a person or a number.
 5. The middle paragraphs move forward in time: first setback, first win, the turning decision.
-6. The last paragraph is the payoff. It ends with exactly: "Everyone knows how {pronoun} story ends. This is how it started."
-7. Present facts as facts. If SOURCE says something is a claim or legend, say "according to" or "by his own account".
+6. The last paragraph is the payoff: first one sentence (12+ words) with the turning-point fact that answers
+   the hook, then exactly: "Everyone knows how {pronoun} story ends. This is how it started."
+7. Keep events apart: never put two events in one sentence or paragraph as if they happened together
+   unless SOURCE says so. Each event keeps its own year. Do not exaggerate ("failed the exam" when SOURCE
+   says he failed part of it is wrong).
+8. Present facts as facts. If SOURCE says something is a claim or legend, say "according to" or "by his own account".
 
 Before answering, check: no invented years, numbers, names or quotes; no greetings; no questions to the viewer;
 no exclamation marks; no headings or labels; none of the banned words.
