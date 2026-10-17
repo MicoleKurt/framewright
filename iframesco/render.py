@@ -306,6 +306,7 @@ def assemble(work: str, video: str, voice: list[str], out: str, music_file: str 
     else:
         music(f"{work}/music.m4a", total, mood)
     shade(f"{work}/shade.png")
+    fade_in = "" if FMT.vertical else "fade=t=in:d=0.6,"  # Shorts: frame 1 must already show the picture
     ff("-i", video, "-i", "narration.wav", "-i", "music.m4a", "-loop", "1", "-i", "shade.png",
        "-filter_complex",
        "[1:a]asplit=2[n1][n2];[2:a]volume=0.5[m];"
@@ -315,6 +316,6 @@ def assemble(work: str, video: str, voice: list[str], out: str, music_file: str 
        "[0:v]eq=contrast=1.07:saturation=0.86:gamma=0.98,"
        "colorbalance=rs=0.04:gs=0.01:bs=-0.04:rh=0.03:bh=-0.03,vignette=PI/5,"
        "noise=alls=5:allf=t[g];[g][3:v]overlay=shortest=1,"
-       f"subtitles=captions.ass,fade=t=in:d=0.6,fade=t=out:st={total-0.8:.2f}:d=0.8[v]",
+       f"subtitles=captions.ass,{fade_in}fade=t=out:st={total-0.8:.2f}:d=0.8[v]",
        "-map", "[v]", "-map", "[a]", *enc(), "-c:a", "aac", "-b:a", "192k",
        "-movflags", "+faststart", "-shortest", out, cwd=work)
