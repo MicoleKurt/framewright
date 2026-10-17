@@ -57,14 +57,18 @@ def _candidates(scene: dict, subject: str, fmt, use_youtube: bool, work: str, id
             cands.append({"file": clip["path"], "kind": "video", "source": "YouTube (CC BY)", "preview": ""})
     wiki_only = scene.get("images") == "wiki"
     for raw, q in dict.fromkeys(zip(scene.get("keywords") or [subject], queries)):
-        if raw.lower().startswith("file:"):  # an exact file, chosen by a person: used as-is, in order
+        if raw.lower().startswith("local:"):  # a file on disk (e.g. a clip cut with clipsco), used as-is
+            path = os.path.expanduser(raw[6:].strip())
+            kind = "video" if path.lower().endswith((".mp4", ".mov", ".webm", ".mkv")) else "image"
+            cands.append({"file": path, "kind": kind, "source": "local", "preview": ""})
+        elif raw.lower().startswith("file:"):  # an exact file, chosen by a person: used as-is, in order
             cands += research.file_image(raw[5:].strip())
         elif raw.lower().startswith("wiki:"):  # photos from that Wikipedia article: hand-picked, on topic
             cands += research.wiki_images(raw[5:].strip())
         elif not wiki_only:
             cands += research.stock_videos(q, 2, fmt.orientation)
             cands += research.commons_images(q, 6)
-    exact = all(k.lower().startswith("file:") for k in scene.get("keywords") or ["-"])
+    exact = all(k.lower().startswith(("file:", "local:")) for k in scene.get("keywords") or ["-"])
     if len(cands) < 3 and not exact:  # hand-picked files: never pad with other pictures
         cands += research.wiki_images(subject) or research.commons_images(subject, 6)
     seen, out = set(), []
@@ -99,7 +103,7 @@ def _gather(scene: dict, idx: int, work: str, subject: str, fmt, ranker: relevan
             except Exception as e:
                 print(f"[media] skip {c.get('url')}: {e}")
 
-    exact = all(k.lower().startswith("file:") for k in scene.get("keywords") or ["-"])
+    exact = all(k.lower().startswith(("file:", "local:")) for k in scene.get("keywords") or ["-"])
     take(cands if exact else ranker.rank(text, cands, keep=shots + 2))
     if not chosen:  # all duplicates of earlier shots or failed: take search order, not a blank card
         take(cands[:shots + 2])
